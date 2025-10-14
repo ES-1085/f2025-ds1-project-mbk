@@ -22,7 +22,7 @@ Text goes here. Place your data in the /data folder, and add dimensions and code
 
 ```{r}
 library(readr)
-Andro <- read_csv("../data/Andro.csv")
+Lew_Aub <- read_csv("../data/Lew_Aub.csv")
 
 # Read in your data file
 # Print the output of glimpse() or skim()
