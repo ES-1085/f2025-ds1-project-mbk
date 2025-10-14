@@ -24,8 +24,6 @@ Text goes here. Place your data in the /data folder, and add dimensions and code
 library(readr)
 Lew_Aub <- read_csv("../data/Lew_Aub.csv")
 
-# Read in your data file
-# Print the output of glimpse() or skim()
 ```
 
 ## 3. Data analysis plan

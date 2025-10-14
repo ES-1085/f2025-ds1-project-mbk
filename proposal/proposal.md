@@ -37,11 +37,6 @@ Lew_Aub <- read_csv("../data/Lew_Aub.csv")
     ## ℹ Use `spec()` to retrieve the full column specification for this data.
     ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 
-``` r
-# Read in your data file
-# Print the output of glimpse() or skim()
-```
-
 ## 3. Data analysis plan
 
 Text goes here. - What variables will you visualize to explore your
