@@ -6,15 +6,24 @@ output: github_document
 
 ```{r load-packages, message = FALSE}
 library(tidyverse)
+library(gapminder)
 library(broom)
-## Add any additional packages you are using here
+library(skimr)
 ```
 
 ## 1. Introduction
 
 The introduction should introduce your general research question(s) and your data (where it came from, how it was collected, what are the cases, what are the variables, etc.).
 
-Text goes here. Refer to the Markdown Quick Reference: Help -> Markdown Quick Reference. 
+Our project will look at how social and economic patterns have changed in different countries overtime. We plan to use the Gapminder dataset, which tracks social and economic indicators (like population, GDP per Capita, and Fertility overtime. 
+
+Our guiding questions are:
+- How are GDP per capita and life expectancy related across countries?
+- Have these relationships changed by country over time?
+
+Understanding these questions helps reveal how economic growth influences population well-being, and whether global inequality in health and wealth is narrowing or widening.
+
+The Gapminder dataset was compiled by Hans Rosling’s Gapminder Foundation, using publicly available data from the World Bank, United Nations, and OECD. Each row in the dataset represents a country in a given year, with variables describing life expectancy, population, and GDP per capita.
 
 ## 2. Data
 
@@ -22,8 +31,11 @@ Text goes here. Place your data in the /data folder, and add dimensions and code
 
 ```{r}
 library(readr)
-Lew_Aub <- read_csv("../data/Lew_Aub.csv")
-
+homicide <- read_csv("../data/murder_total_deaths.csv")
+life <- read_csv("../data/lex.csv")
+gdp_per_capita <- read_csv("../data/gdp_pcap.csv")
+fertility <- read_csv("../data/children_per_woman_total_fertility.csv")
+population <- read_csv("../data/pop.csv")
 ```
 
 ## 3. Data analysis plan
