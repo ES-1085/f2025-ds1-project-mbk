@@ -119,7 +119,7 @@ The visualization below shows the relationship of GDP per Capita to Life Expecta
 - The data visualization(s) that you believe will be useful in exploring your question(s). (You can update these later as you work on your project.)
 
 
-```{r}
+```{r summary-statistics-and-visualizations, message = FALSE}
 # Code to calculate summary statistics
 
 #Summary Stats by Variable
