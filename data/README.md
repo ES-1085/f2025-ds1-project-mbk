@@ -22,3 +22,5 @@ using the following format.
 - `babies_per_woman`: Average number of births per woman  
 - `homicide_rate`: Total homicides  
 - `pop`: Total population of the country  
+- `gdp_growth_percent`: Percent change in GDP from previous year to current year
+- `pop_growth_percent`: Percent change in population from previous year to current year
