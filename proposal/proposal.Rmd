@@ -35,17 +35,11 @@ gdp_per_capita <- read_csv("../data/gdp_pcap.csv")
 babies_per_woman <- read_csv("../data/children_per_woman_total_fertility.csv")
 population <- read_csv("../data/pop.csv")
 
-<<<<<<< HEAD
-```{r}
+
+
 library(readr)
-<<<<<<< HEAD
-Andro <- read_csv("../data/2024.annual 23001 Androscoggin County, Maine.csv")
-# Read in your data file
-# Print the output of glimpse() or skim()
-=======
-Lew_Aub <- read_csv("../data/Lew_Aub.csv")
->>>>>>> 394950caddca886b030e26ba72cb75f8fc643965
-=======
+
+
 ## Pivot the data into long form
 homicide_long <- homicide %>%
   pivot_longer(
@@ -67,7 +61,7 @@ gdp_long <- gdp_per_capita %>%
     names_to  = "year",
     values_to = "gdpPercap"
   ) 
->>>>>>> 1b73bbe3870685a66570fb54c961a3fee15b48f3
+
 
 babies_per_woman_long <- babies_per_woman %>%
   pivot_longer(
