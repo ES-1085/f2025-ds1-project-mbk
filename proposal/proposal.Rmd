@@ -6,20 +6,36 @@ output: github_document
 
 ```{r load-packages, message = FALSE}
 library(tidyverse)
+library(gapminder)
 library(broom)
-## Add any additional packages you are using here
+library(skimr)
+library(dplyr)
+library(readr)
 ```
 
 ## 1. Introduction
 
-The introduction should introduce your general research question(s) and your data (where it came from, how it was collected, what are the cases, what are the variables, etc.).
+Our project will look at how social and economic patterns have changed in different countries over time. We plan to use merged datasets found on Gapminder that track social and economic indicators (like population, GDP per Capita, fertility rates, and murder rates) in different countries over time. 
 
-Text goes here. Refer to the Markdown Quick Reference: Help -> Markdown Quick Reference. 
+Overarching research question: 
+- How does GDP per capita relate to social outcomes like life expectancy, fertility rates, population growth, and murder rates across countries between 1990 and 2021?
+
+Each row in each dataset taken from Gapminder represents a country in a given year, and each column represents the count or percent for the given variable in that year. We merged datasets focused on the variables life expectancy, population, babies per woman, murder rate, and GDP per capita into one dataset. In the merged data set, each row represents a country in a given year, and the columns represent the rate or percentage experienced during that year. The variables are homicide rate, life expectancy, GDP per capita, babies per woman, population, GDP growth percentage (measured as the percent change in GDP from the previous year to the current year), and population growth percentage (measured as the percent change in population from the previous year to the current year).
+
+The Gapminder datasets collect data from publicly available data from the World Bank. Data source: https://www.gapminder.org/data/ 
+
 
 ## 2. Data
 
-Text goes here. Place your data in the /data folder, and add dimensions and codebook to the README in that folder. Then print out the output of glimpse() or skim() of your data frame.
+Creating our merged dataset:
+```{r create-merged-dataset, message = FALSE}
+homicide <- read_csv("../data/murder_total_deaths.csv")
+life <- read_csv("../data/lex.csv")
+gdp_per_capita <- read_csv("../data/gdp_pcap.csv")
+babies_per_woman <- read_csv("../data/children_per_woman_total_fertility.csv")
+population <- read_csv("../data/pop.csv")
 
+<<<<<<< HEAD
 ```{r}
 library(readr)
 <<<<<<< HEAD
@@ -29,20 +45,124 @@ Andro <- read_csv("../data/2024.annual 23001 Androscoggin County, Maine.csv")
 =======
 Lew_Aub <- read_csv("../data/Lew_Aub.csv")
 >>>>>>> 394950caddca886b030e26ba72cb75f8fc643965
+=======
+## Pivot the data into long form
+homicide_long <- homicide %>%
+  pivot_longer(
+    cols = -c(geo, name),
+    names_to  = "year",
+    values_to = "homicide_rate"
+  )
 
+life_long <- life %>%
+  pivot_longer(
+    cols = -c(geo, name),
+    names_to  = "year",
+    values_to = "lifeExp"
+  ) 
+
+gdp_long <- gdp_per_capita %>%
+  pivot_longer(
+    cols = -c(geo, name),
+    names_to  = "year",
+    values_to = "gdpPercap"
+  ) 
+>>>>>>> 1b73bbe3870685a66570fb54c961a3fee15b48f3
+
+babies_per_woman_long <- babies_per_woman %>%
+  pivot_longer(
+    cols = -c(geo, name),
+    names_to  = "year",
+    values_to = "babies_per_woman"
+  ) 
+
+pop_long <- population %>%
+  pivot_longer(
+    cols = -c(geo, name),
+    names_to  = "year",
+    values_to = "pop"
+  ) 
+
+#Merge Datasets
+combined_long <- homicide_long %>%
+  full_join(life_long,      by = c("geo", "name", "year")) %>%
+  full_join(gdp_long,       by = c("geo", "name", "year")) %>%
+  full_join(babies_per_woman_long, by = c("geo", "name", "year")) %>%
+  full_join(pop_long,       by = c("geo", "name", "year"))
+
+combined_long <- combined_long %>%
+  filter(year >= 1990 & year <= 2021)
+
+combined_long <- combined_long %>%
+  group_by(geo) %>% 
+  mutate(
+    gdp_growth_percent = (gdpPercap - lag(gdpPercap)) / lag(gdpPercap) * 100,
+    pop_growth_percent = (pop - lag(pop)) / lag(pop) * 100
+  ) %>%
+  ungroup()
 ```
+Glimpse:
+```{r glimse, message = FALSE}
+glimpse(combined_long)
+```
+Skim:
+```{r skim, message = FALSE}
+skim(combined_long)
+```
+
 
 ## 3. Data analysis plan
 
 Text goes here.
 - What variables will you visualize to explore your research questions?
+
+We will visualize relationships between GDP per capita and life expectancy, fertility rate, homicide rate, population growth, and GDP growth to find out whether higher income levels are associated with longer lives, lower crime, smaller families, and slower population growth.
+
 - Will there be any other data that you need to find to help with your research question?
+
+We won't need any more data to help with our research question at this stage, but it's possible that that will arise later on.
+
 - Very preliminary exploratory data analysis, including some summary statistics and visualizations, along with some explanation on how they help you learn more about your data. (You can add to these later as you work on your project.)
+
+The first summary statistic displays statistics by variable. The second summary statistic displays summary statistics by country in descending order of mean GDP.
+
+The visualization below shows the relationship of GDP per Capita to Life Expectancy. We will create more of these for each variable later to examine a correlation. We will also created stacked bar charts with top countries compared to bottom countries to visually see how variables related to GDP per Capita
+
 - The data visualization(s) that you believe will be useful in exploring your question(s). (You can update these later as you work on your project.)
 
 
-```{r}
-# Code goes here
+```{r summary-statistics-and-visualizations, message = FALSE}
 # Code to calculate summary statistics
+
+#Summary Stats by Variable
+combined_long %>%
+select(gdpPercap, lifeExp, babies_per_woman, homicide_rate, gdp_growth_percent, pop_growth_percent) %>%
+summary()
+
+#Summary Stats by Country
+country_summary <- combined_long %>%
+  group_by(name) %>%
+  summarise(
+    mean_gdp = mean(gdpPercap, na.rm = TRUE),
+    mean_lifeExp = mean(lifeExp, na.rm = TRUE),
+    mean_babies_per_woman = mean(babies_per_woman, na.rm = TRUE),
+    mean_homicide = mean(homicide_rate, na.rm = TRUE),
+    mean_gdp_growth = mean(gdp_growth_percent, na.rm = TRUE),
+    mean_pop_growth = mean(pop_growth_percent, na.rm = TRUE)
+  ) %>%
+  arrange(desc(mean_gdp))
+
+view(country_summary)
+
 # Code for a visualization
+combined_long %>%
+ggplot(aes(x = gdpPercap, y = lifeExp)) +
+geom_point(alpha = 0.6) +
+scale_x_log10(labels = scales::dollar_format()) +
+labs(
+title = "Relationship Between GDP per Capita and Life Expectancy (1990–2021)",
+x = "GDP per Capita (log scale, USD)",
+y = "Life Expectancy (years)"
+) 
+
 ```
