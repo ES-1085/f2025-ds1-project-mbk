@@ -22,8 +22,7 @@ Text goes here. Place your data in the /data folder, and add dimensions and code
 
 ```{r}
 library(readr)
-Andro <- read_csv("../data/Andro.csv")
-
+X2024_annual_23001_Androscoggin_County_Maine <- read_csv("../data/Andro.csv")
 # Read in your data file
 # Print the output of glimpse() or skim()
 ```
