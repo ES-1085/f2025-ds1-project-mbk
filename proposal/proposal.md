@@ -257,4 +257,4 @@ y = "Life Expectancy (years)"
     ## Warning: Removed 64 rows containing missing values or values outside the scale range
     ## (`geom_point()`).
 
-![](proposal_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
+![](proposal_files/figure-gfm/summary-statistics-and-visualizations-1.png)<!-- -->
