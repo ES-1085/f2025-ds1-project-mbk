@@ -50,6 +50,11 @@ gdp_per_capita <- read_csv("../data/gdp_pcap.csv")
 babies_per_woman <- read_csv("../data/children_per_woman_total_fertility.csv")
 population <- read_csv("../data/pop.csv")
 
+
+
+library(readr)
+
+
 ## Pivot the data into long form
 homicide_long <- homicide %>%
   pivot_longer(
@@ -71,6 +76,7 @@ gdp_long <- gdp_per_capita %>%
     names_to  = "year",
     values_to = "gdpPercap"
   ) 
+
 
 babies_per_woman_long <- babies_per_woman %>%
   pivot_longer(
