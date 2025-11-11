@@ -1,44 +1,29 @@
 ---
-title: "Project proposal"
+title: "Project memo"
 author: "Team MBK"
 output: github_document
 ---
 
+This document should contain a detailed account of the data clean up for your data and the design choices you are making for your plots. For instance you will want to document choices you've made that were intentional for your graphic, e.g. color you've chosen for the plot. Think of this document as a code script someone can follow to reproduce the data cleaning steps and graphics in your handout.
+
 ```{r load-packages, message = FALSE}
 library(tidyverse)
-library(gapminder)
 library(broom)
-library(skimr)
-library(dplyr)
 library(readr)
+library(scales)
 ```
 
-## 1. Introduction
+## Data Clean Up Steps for Overall Data
 
-Our project will look at how social and economic patterns have changed in different countries over time. We plan to use merged datasets found on Gapminder that track social and economic indicators (like population, GDP per Capita, fertility rates, and murder rates) in different countries over time. 
-
-Overarching research question: 
-- How does GDP per capita relate to social outcomes like life expectancy, fertility rates, population growth, and murder rates across countries between 1990 and 2021?
-
-Each row in each dataset taken from Gapminder represents a country in a given year, and each column represents the count or percent for the given variable in that year. We merged datasets focused on the variables life expectancy, population, babies per woman, murder rate, and GDP per capita into one dataset. In the merged data set, each row represents a country in a given year, and the columns represent the rate or percentage experienced during that year. The variables are homicide rate, life expectancy, GDP per capita, babies per woman, population, GDP growth percentage (measured as the percent change in GDP from the previous year to the current year), and population growth percentage (measured as the percent change in population from the previous year to the current year).
-
-The Gapminder datasets collect data from publicly available data from the World Bank. Data source: https://www.gapminder.org/data/ 
-
-
-## 2. Data
-
-Creating our merged dataset:
-```{r create-merged-dataset, message = FALSE}
+### Step 1: Load and Pivot Individual Datasets to Long Format
+We load five separate CSV files from Gapminder and pivot each from wide format (years as columns) to long format (one row per country-year). This structure is necessary for merging datasets and performing analysis.
+```{r}
 homicide <- read_csv("../data/murder_total_deaths.csv")
 life <- read_csv("../data/lex.csv")
 gdp_per_capita <- read_csv("../data/gdp_pcap.csv")
 babies_per_woman <- read_csv("../data/children_per_woman_total_fertility.csv")
 population <- read_csv("../data/pop.csv")
 
-library(readr)
-# Read in your data file
-# Print the output of glimpse() or skim()
-## Pivot the data into long form
 homicide_long <- homicide %>%
   pivot_longer(
     cols = -c(geo, name),
@@ -72,88 +57,106 @@ pop_long <- population %>%
     cols = -c(geo, name),
     names_to  = "year",
     values_to = "pop"
-  ) 
+  )
+```
 
-#Merge Datasets
+### Step 2: Merge Datasets and Filter Years
+We merge all five datasets using full joins to preserve all country-year observations, then filter to focus on 1990-2021. We also calculate growth rates for GDP and population.
+```{r}
 combined_long <- homicide_long %>%
-  full_join(life_long,      by = c("geo", "name", "year")) %>%
-  full_join(gdp_long,       by = c("geo", "name", "year")) %>%
+  full_join(life_long, by = c("geo", "name", "year")) %>%
+  full_join(gdp_long, by = c("geo", "name", "year")) %>%
   full_join(babies_per_woman_long, by = c("geo", "name", "year")) %>%
-  full_join(pop_long,       by = c("geo", "name", "year"))
+  full_join(pop_long, by = c("geo", "name", "year"))
 
 combined_long <- combined_long %>%
   filter(year >= 1990 & year <= 2021)
 
 combined_long <- combined_long %>%
+  mutate(year = as.numeric(year)) %>%
   group_by(geo) %>% 
   mutate(
     gdp_growth_percent = (gdpPercap - lag(gdpPercap)) / lag(gdpPercap) * 100,
     pop_growth_percent = (pop - lag(pop)) / lag(pop) * 100
   ) %>%
   ungroup()
-```
-Glimpse:
-```{r glimse, message = FALSE}
-glimpse(combined_long)
-```
-Skim:
-```{r skim, message = FALSE}
-skim(combined_long)
-```
-
-
-## 3. Data analysis plan
-
-Text goes here.
-- What variables will you visualize to explore your research questions?
-
-We will visualize relationships between GDP per capita and life expectancy, fertility rate, homicide rate, population growth, and GDP growth to find out whether higher income levels are associated with longer lives, lower crime, smaller families, and slower population growth.
-
-- Will there be any other data that you need to find to help with your research question?
-
-We won't need any more data to help with our research question at this stage, but it's possible that that will arise later on.
-
-- Very preliminary exploratory data analysis, including some summary statistics and visualizations, along with some explanation on how they help you learn more about your data. (You can add to these later as you work on your project.)
-
-The first summary statistic displays statistics by variable. The second summary statistic displays summary statistics by country in descending order of mean GDP.
-
-The visualization below shows the relationship of GDP per Capita to Life Expectancy. We will create more of these for each variable later to examine a correlation. We will also created stacked bar charts with top countries compared to bottom countries to visually see how variables related to GDP per Capita
-
-- The data visualization(s) that you believe will be useful in exploring your question(s). (You can update these later as you work on your project.)
-
-
-```{r summary-statistics-and-visualizations, message = FALSE}
-# Code to calculate summary statistics
-
-#Summary Stats by Variable
-combined_long %>%
-select(gdpPercap, lifeExp, babies_per_woman, homicide_rate, gdp_growth_percent, pop_growth_percent) %>%
-summary()
-
-#Summary Stats by Country
-country_summary <- combined_long %>%
-  group_by(name) %>%
-  summarise(
-    mean_gdp = mean(gdpPercap, na.rm = TRUE),
-    mean_lifeExp = mean(lifeExp, na.rm = TRUE),
-    mean_babies_per_woman = mean(babies_per_woman, na.rm = TRUE),
-    mean_homicide = mean(homicide_rate, na.rm = TRUE),
-    mean_gdp_growth = mean(gdp_growth_percent, na.rm = TRUE),
-    mean_pop_growth = mean(pop_growth_percent, na.rm = TRUE)
-  ) %>%
-  arrange(desc(mean_gdp))
-
-view(country_summary)
-
-# Code for a visualization
-combined_long %>%
-ggplot(aes(x = gdpPercap, y = lifeExp)) +
-geom_point(alpha = 0.6) +
-scale_x_log10(labels = scales::dollar_format()) +
-labs(
-title = "Relationship Between GDP per Capita and Life Expectancy (1990–2021)",
-x = "GDP per Capita (log scale, USD)",
-y = "Life Expectancy (years)"
-) 
 
 ```
+
+## Plots
+
+### ggsave example for saving plots
+
+```{r starwars ggsave example}
+p1 <- starwars |>
+  filter(mass < 1000, 
+         species %in% c("Human", "Cerean", "Pau'an", "Droid", "Gungan")) |>
+  ggplot() +
+  geom_point(aes(x = mass, 
+                 y = height, 
+                 color = species)) +
+  labs(x = "Weight (kg)", 
+       y = "Height (m)",
+       color = "Species",
+       title = "Weight and Height of Select Starwars Species",
+       caption = paste("This data comes from the starwars api: https://swapi.py43.com"))
+
+
+ggsave("example-starwars.png", width = 4, height = 4)
+
+ggsave("example-starwars-wide.png", width = 6, height = 4)
+```
+
+
+
+### Plot 1: GDP per Capita vs. Life Expectancy
+This plot examines the relationship between economic prosperity (GDP per capita) and health outcomes (life expectancy).
+
+Design choices:
+- Log scale on x-axis to handle the wide range of GDP values and reveal patterns across all income levels
+- Steelblue color with alpha = 0.4 transparency to show density where points overlap
+- LOESS smoothing curve in dark red to highlight the overall positive relationship
+- Dollar formatting on x-axis for readability
+- Minimal theme for clean, professional appearance
+
+
+#### Data cleanup steps specific to plot 1
+```{r}
+plot1_data <- combined_long %>%
+  filter(!is.na(gdpPercap), !is.na(lifeExp))
+```
+
+
+
+#### Final Plot 1
+
+```{r}
+p1 <- plot1_data %>%
+  ggplot(aes(x = gdpPercap, y = lifeExp)) +
+  geom_point(alpha = 0.4, color = "steelblue", size = 1.5) +
+  geom_smooth(method = "loess", color = "darkred", se = TRUE, linewidth = 1.2) +
+  scale_x_log10(labels = dollar_format()) +
+  labs(
+    title = "GDP per Capita and Life Expectancy",
+    subtitle = "All countries, 1990-2021",
+    x = "GDP per Capita (log scale, USD)",
+    y = "Life Expectancy (years)",
+    caption = "Data source: Gapminder (World Bank)"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 14),
+    plot.subtitle = element_text(size = 11, color = "gray40")
+  )
+p1
+ggsave("plot1_gdp_life_expectancy.png", plot = p1, width = 7, height = 5)
+```
+
+
+### Plot 2: _________
+
+### Plot 3: ___________
+
+Add more plot sections as needed. Each project should have at least 3 plots, but talk to me if you have fewer than 3.
+
+### Plot 4: ___________ 
