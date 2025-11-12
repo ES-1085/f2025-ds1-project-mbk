@@ -1,6 +1,6 @@
 Project memo
 ================
-Team MBK
+Team name
 
 This document should contain a detailed account of the data clean up for
 your data and the design choices you are making for your plots. For
@@ -19,11 +19,6 @@ library(scales)
 ## Data Clean Up Steps for Overall Data
 
 ### Step 1: Load and Pivot Individual Datasets to Long Format
-
-We load five separate CSV files from Gapminder and pivot each from wide
-format (years as columns) to long format (one row per country-year).
-This structure is necessary for merging datasets and performing
-analysis.
 
 ``` r
 homicide <- read_csv("../data/murder_total_deaths.csv")
@@ -177,7 +172,7 @@ ggsave("example-starwars.png", width = 4, height = 4)
 ggsave("example-starwars-wide.png", width = 6, height = 4)
 ```
 
-# Plot \#1: Life Expectancy Comparison - Top 3 vs Bottom 3 GDP Countries
+### Plot 1: Life Expectancy Comparison - Top 3 vs Bottom 3 GDP Countries
 
 This bar chart provides a direct comparison of life expectancy between
 the world’s wealthiest and poorest countries in 2021, clearly
@@ -197,7 +192,10 @@ what each color represents - **Centered bold title**: Emphasizes the
 comparison being made - **Minimal theme**: Clean, professional
 appearance without distracting elements
 
-# Plot \#1 Final
+#### Data cleanup steps specific to plot 1
+
+Filter to 2021 data only, then identify the top 3 and bottom 3 countries
+by GDP per capita.
 
 ``` r
 plot1_data <- combined_long %>%
@@ -216,8 +214,11 @@ bottom3 <- plot1_data %>%
 
 # Combine the two sets
 compare_data <- bind_rows(top3, bottom3)
+```
 
-# Plot bar chart
+#### Final Plot 1
+
+``` r
 p1 <- compare_data %>%
   ggplot(aes(x = reorder(name, lifeExp), y = lifeExp, fill = group)) +
   geom_col(width = 0.7) +
@@ -239,7 +240,7 @@ p1 <- compare_data %>%
 p1
 ```
 
-![](memo_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
+![](memo_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
 ``` r
 ggsave("plot_top_bottom3_gdp_life_expectancy.png", plot = p1, width = 8, height = 5)
