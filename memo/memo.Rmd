@@ -107,52 +107,63 @@ ggsave("example-starwars.png", width = 4, height = 4)
 ggsave("example-starwars-wide.png", width = 6, height = 4)
 ```
 
+# Plot #1: Life Expectancy Comparison - Top 3 vs Bottom 3 GDP Countries
 
-
-### Plot 1: GDP per Capita vs. Life Expectancy
-This plot examines the relationship between economic prosperity (GDP per capita) and health outcomes (life expectancy).
+This bar chart provides a direct comparison of life expectancy between the world's wealthiest and poorest countries in 2021, clearly illustrating the health gap associated with economic development.
 
 Design choices:
-- Log scale on x-axis to handle the wide range of GDP values and reveal patterns across all income levels
-- Steelblue color with alpha = 0.4 transparency to show density where points overlap
-- LOESS smoothing curve in dark red to highlight the overall positive relationship
-- Dollar formatting on x-axis for readability
-- Minimal theme for clean, professional appearance
+- **2021 focus**: Uses the most recent year in the dataset for current relevance
+- **Top 3 vs Bottom 3 comparison**: Highlights the extremes to show the maximum health disparity between richest and poorest nations
+- **Horizontal bars (coord_flip)**: Country names are easier to read horizontally, and bars naturally show magnitude
+- **Ordered by life expectancy**: Countries arranged from lowest to highest life expectancy for intuitive reading
+- **Color contrast**: Dark green for wealthy countries and coral for poor countries creates clear visual separation between groups
+- **Legend at bottom**: Keeps the focus on the bars while maintaining clarity about what each color represents
+- **Centered bold title**: Emphasizes the comparison being made
+- **Minimal theme**: Clean, professional appearance without distracting elements
 
-
-#### Data cleanup steps specific to plot 1
+# Plot #1 Final
 ```{r}
 plot1_data <- combined_long %>%
-  filter(!is.na(gdpPercap), !is.na(lifeExp))
-```
+  filter(!is.na(gdpPercap), !is.na(lifeExp), year == 2021)
 
+# Find top 3 and bottom 3 countries by GDP per capita
+top3 <- plot1_data %>%
+  arrange(desc(gdpPercap)) %>%
+  slice_head(n = 3) %>%
+  mutate(group = "Top 3 GDP")
 
+bottom3 <- plot1_data %>%
+  arrange(gdpPercap) %>%
+  slice_head(n = 3) %>%
+  mutate(group = "Bottom 3 GDP")
 
-#### Final Plot 1
+# Combine the two sets
+compare_data <- bind_rows(top3, bottom3)
 
-```{r}
-p1 <- plot1_data %>%
-  ggplot(aes(x = gdpPercap, y = lifeExp)) +
-  geom_point(alpha = 0.4, color = "steelblue", size = 1.5) +
-  geom_smooth(method = "loess", color = "darkred", se = TRUE, linewidth = 1.2) +
-  scale_x_log10(labels = dollar_format()) +
+# Plot bar chart
+p1 <- compare_data %>%
+  ggplot(aes(x = reorder(name, lifeExp), y = lifeExp, fill = group)) +
+  geom_col(width = 0.7) +
+  coord_flip() +
   labs(
-    title = "GDP per Capita and Life Expectancy",
-    subtitle = "All countries, 1990-2021",
-    x = "GDP per Capita (log scale, USD)",
+    title = "Life Expectancy: Top 3 vs Bottom 3 GDP per Capita Countries (2021)",
+    x = "Country",
     y = "Life Expectancy (years)",
+    fill = "Group",
     caption = "Data source: Gapminder (World Bank)"
   ) +
+  scale_fill_manual(values = c("Top 3 GDP" = "darkgreen", "Bottom 3 GDP" = "coral")) +
   theme_minimal() +
   theme(
-    plot.title = element_text(face = "bold", size = 14),
-    plot.subtitle = element_text(size = 11, color = "gray40")
+    plot.title = element_text(face = "bold", hjust = 0.5, size = 11),
+    legend.position = "bottom"
   )
+
 p1
-ggsave("plot1_gdp_life_expectancy.png", plot = p1, width = 7, height = 5)
+
+ggsave("plot_top_bottom3_gdp_life_expectancy.png", plot = p1, width = 8, height = 5)
+
 ```
-
-
 ### Plot 2: _________
 
 ### Plot 3: ___________
