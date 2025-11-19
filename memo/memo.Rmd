@@ -181,6 +181,7 @@ ggsave("plot1_gdp_life_expectancy.png", plot = p1, width = 7, height = 5)
 
 ### Plot 2: _________
 
+
 ### Plot 3: ___________
 
 Add more plot sections as needed. Each project should have at least 3 plots, but talk to me if you have fewer than 3.
