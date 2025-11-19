@@ -170,6 +170,40 @@ ggsave("plot_top_bottom3_gdp_life_expectancy.png", plot = p1, width = 8, height 
 
 
 ### Plot 2: _________
+0
+
+```{r}
+cl_2020 <- combined_long %>% filter(year == 2020)
+
+ggplot(cl_2020, aes(gdpPercap, babies_per_woman)) +
+  geom_point(alpha = 0.6, color = "steelblue") +
+  scale_x_log10() +
+  labs(
+    title = "Fertility Rate vs GDP per Capita (2020)",
+    x = "GDP per Capita (log scale)",
+    y = "Fertility Rate (Babies per Woman)",
+    caption = "Data source: Gapminder (World Bank)"
+  ) +
+  theme_minimal()
+
+ggsave("fertility_gdp_per_capita_2020.png", width = 8, height = 5)
+
+cl_1990 <- combined_long %>% filter(year == 1990)
+
+ggplot(cl_1990, aes(gdpPercap, babies_per_woman)) +
+  geom_point(alpha = 0.6, color = "steelblue") +
+  scale_x_log10() +
+  labs(
+    title = "Fertility Rate vs GDP per Capita (1990)",
+    x = "GDP per Capita (log scale)",
+    y = "Fertility Rate (Babies per Woman)",
+    caption = "Data source: Gapminder (World Bank)"
+  ) +
+  theme_minimal()
+
+ggsave("fertility_gdp_per_capita_1990.png", width = 8, height = 5)
+
+```
 
 
 ### Plot 3: ___________
