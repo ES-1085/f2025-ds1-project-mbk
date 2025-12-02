@@ -186,42 +186,36 @@ p1
 ```{r}
 library(dplyr)
 library(ggplot2)
-data_2020 <- combined_long %>%
-  filter(year == 2020, !is.na(gdpPercap), !is.na(lifeExp))
-plot_data <- data_2020 %>%
-  mutate(
-    gdp_level = ntile(gdpPercap, 3),       
-    gdp_level = factor(
-      gdp_level,
-      levels = c(1, 2, 3),
-      labels = c("Low GDP", "Middle GDP", "High GDP")
-    )
-  )
-p1 <- ggplot(plot_data, aes(x = gdpPercap, y = lifeExp)) +
-  geom_point(aes(color = gdp_level)) +
-geom_smooth(
+
+plot_data <- combined_long %>%   
+  filter(year == 2020,
+         !is.na(gdpPercap),
+         !is.na(lifeExp))
+
+gdp_life_plot <- ggplot(plot_data, aes(x = gdpPercap, y = lifeExp)) +
+  geom_point(aes(color = income_group)) +
+  geom_smooth(
     method = "lm",
     se = FALSE,
     linetype = "dashed",
-    color = "grey20"
+    linewidth = 1.1,
+    color = "grey40"
   ) +
   scale_x_log10() +
   scale_color_manual(
-    values = c(
-      "Low GDP"    = "#F4A582",
-      "Middle GDP" = "#FDBF6F",
-      "High GDP"   = "#7FC97F"
-    )
+    values = income_colors,
+    drop = FALSE,
+    name = "Income Group"
   ) +
   labs(
-    title   = "GDP vs Life Expectancy",
-    x       = "GDP per Capita (log scale)",
-    y       = "Life Expectancy (years)",
-    color   = "GDP Level"
+    title    = "GDP vs Life Expectancy",
+    subtitle = "Year: 2020",
+    x        = "GDP per Capita (log scale)",
+    y        = "Life Expectancy (years)"
   ) +
-  theme_minimal() 
-p1
-ggsave("GDP-vs-Life-Expectancy-scatter.png", width = 8, height = 5)
+  theme_minimal()
+
+gdp_life_plot
 
 ```
 
