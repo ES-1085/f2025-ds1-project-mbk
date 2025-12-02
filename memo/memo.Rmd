@@ -180,7 +180,7 @@ p1
 ```
 
 
-### Plot 2: _________
+### Plot 2: Life Expectancy x GDP Per Capita
 
 
 ```{r}
