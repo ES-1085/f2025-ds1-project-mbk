@@ -4,8 +4,8 @@ author: "Team name"
 output: github_document
 ---
 
-This document should contain a detailed account of the data clean up for your data and the design choices you are making for your plots. For instance you will want to document choices you've made that were intentional for your graphic, e.g. color you've chosen for the plot. Think of this document as a code script someone can follow to reproduce the data cleaning steps and graphics in your handout.
 
+This document contains a detailed account of the data cleanup steps and design choices for our visualizations exploring the relationship between GDP per capita and social outcomes (homicide rates, life expectancy, and fertility) across countries from 1990-2021.
 ```{r load-packages, message = FALSE}
 library(tidyverse)
 library(broom)
@@ -17,7 +17,8 @@ library(scales)
 
 ### Step 1: Load and Pivot Individual Datasets to Long Format
 
-```{r}
+We load five separate Gapminder datasets and convert each from wide format (years as columns) to long format (year as a variable) for easier analysis and merging.
+```{r load-and-pivot-data, message = FALSE}
 homicide <- read_csv("../data/murder_total_deaths.csv")
 life <- read_csv("../data/lex.csv")
 gdp_per_capita <- read_csv("../data/gdp_pcap.csv")
@@ -61,8 +62,9 @@ pop_long <- population %>%
 ```
 
 ### Step 2: Merge Datasets and Filter Years
+
 We merge all five datasets using full joins to preserve all country-year observations, then filter to focus on 1990-2021. We also calculate growth rates for GDP and population.
-```{r}
+```{r merge-and-filter-data}
 combined_long <- homicide_long %>%
   full_join(life_long, by = c("geo", "name", "year")) %>%
   full_join(gdp_long, by = c("geo", "name", "year")) %>%
@@ -80,33 +82,42 @@ combined_long <- combined_long %>%
     pop_growth_percent = (pop - lag(pop)) / lag(pop) * 100
   ) %>%
   ungroup()
-
 ```
+
+### Step 3: Create Income Group Classification
+
+We classify countries into four income groups based on GDP per capita thresholds from the World Bank. This classification helps visualize patterns across different economic development levels.
+```{r create-income-groups}
+combined_long <- combined_long %>%
+  mutate(
+    income_group = case_when(
+      gdpPercap >= 50000 ~ "High Income",
+      gdpPercap >= 15000 ~ "Upper-Middle Income",
+      gdpPercap >= 4000 ~ "Lower-Middle Income",
+      TRUE ~ "Low Income"
+    ),
+    income_group = factor(
+      income_group, 
+      levels = c("Low Income", "Lower-Middle Income", "Upper-Middle Income", "High Income")
+    )
+  )
+```
+
+## Color Palette
+
+We use a colorblind-friendly palette throughout our visualizations. The colors are distinguishable for people with various types of color vision deficiency and are also labeled in legends for double-coding accessibility.
+```{r define-color-palette}
+income_colors <- c(
+  "High Income" = "#2A9D8F",
+  "Upper-Middle Income" = "#E9C46A",
+  "Lower-Middle Income" = "#F4A261",
+  "Low Income" = "#E76F51"
+)
+```
+
+---
 
 ## Plots
-
-### ggsave example for saving plots
-
-```{r starwars ggsave example}
-p1 <- starwars |>
-  filter(mass < 1000, 
-         species %in% c("Human", "Cerean", "Pau'an", "Droid", "Gungan")) |>
-  ggplot() +
-  geom_point(aes(x = mass, 
-                 y = height, 
-                 color = species)) +
-  labs(x = "Weight (kg)", 
-       y = "Height (m)",
-       color = "Species",
-       title = "Weight and Height of Select Starwars Species",
-       caption = paste("This data comes from the starwars api: https://swapi.py43.com"))
-
-
-ggsave("example-starwars.png", width = 4, height = 4)
-
-ggsave("example-starwars-wide.png", width = 6, height = 4)
-```
-
 ### Plot 1: Life Expectancy Comparison - Top 3 vs Bottom 3 GDP Countries
 
 This bar chart provides a direct comparison of life expectancy between the world's wealthiest and poorest countries in 2021, clearly illustrating the health gap associated with economic development.
@@ -145,48 +156,27 @@ compare_data <- bind_rows(top3, bottom3)
 
 #### Final Plot 1
 ```{r}
-library(dplyr)
-library(ggplot2)
-
-data_2020 <- combined_long %>%
-  filter(year == 2020, !is.na(gdpPercap), !is.na(lifeExp))
-
-plot_data <- data_2020 %>%
-  mutate(
-    gdp_level = ntile(gdpPercap, 3),       
-    gdp_level = factor(
-      gdp_level,
-      levels = c(1, 2, 3),
-      labels = c("Low GDP", "Middle GDP", "High GDP")
-    )
-  )
-
-p1 <- ggplot(plot_data, aes(x = gdpPercap, y = lifeExp)) +
-  geom_point(aes(color = gdp_level)) +
-geom_smooth(
-    method = "lm",
-    se = FALSE,
-    linetype = "dashed",
-    color = "grey20"
-  ) +
-  scale_x_log10() +
-  scale_color_manual(
-    values = c(
-      "Low GDP"    = "#F4A582",
-      "Middle GDP" = "#FDBF6F",
-      "High GDP"   = "#7FC97F"
-    )
-  ) +
+p1 <- compare_data %>%
+  ggplot(aes(x = reorder(name, lifeExp), y = lifeExp, fill = group)) +
+  geom_col(width = 0.7) +
+  coord_flip() +
   labs(
-    title   = "GDP vs Life Expectancy",
-    x       = "GDP per Capita (log scale)",
-    y       = "Life Expectancy (years)",
-    color   = "GDP Level"
+    title = "Life Expectancy: Top 3 vs Bottom 3 GDP per Capita Countries (2021)",
+    x = "Country",
+    y = "Life Expectancy (years)",
+    fill = "Group",
+    caption = "Data source: Gapminder (World Bank)"
   ) +
-  theme_minimal() 
+  scale_fill_manual(values = c("Top 3 GDP" = "darkgreen", "Bottom 3 GDP" = "coral")) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", hjust = 0.5, size = 11),
+    legend.position = "bottom"
+  )
 
 p1
 
+ggsave("plot_top_bottom3_gdp_life_expectancy.png", plot = p1, width = 8, height = 5)
 ```
 
 
