@@ -187,6 +187,8 @@ geom_smooth(
 
 p1
 
+ggsave("GDP-vs-Life-Expectancy-scatter.png", width = 8, height = 5)
+
 ```
 
 
