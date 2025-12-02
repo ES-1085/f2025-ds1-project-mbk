@@ -186,38 +186,47 @@ ggsave("GDP-vs-Life-Expectancy-scatter.png", width = 8, height = 5)
 
 
 ### Plot 2: _________
-0
+
 
 ```{r}
-cl_2020 <- combined_long %>% filter(year == 2020)
-
-ggplot(cl_2020, aes(gdpPercap, babies_per_woman)) +
-  geom_point(alpha = 0.6, color = "steelblue") +
-  scale_x_log10() +
-  labs(
-    title = "Fertility Rate vs GDP per Capita (2020)",
-    x = "GDP per Capita (log scale)",
-    y = "Fertility Rate (Babies per Woman)",
-    caption = "Data source: Gapminder (World Bank)"
+library(dplyr)
+library(ggplot2)
+data_2020 <- combined_long %>%
+  filter(year == 2020, !is.na(gdpPercap), !is.na(lifeExp))
+plot_data <- data_2020 %>%
+  mutate(
+    gdp_level = ntile(gdpPercap, 3),       
+    gdp_level = factor(
+      gdp_level,
+      levels = c(1, 2, 3),
+      labels = c("Low GDP", "Middle GDP", "High GDP")
+    )
+  )
+p1 <- ggplot(plot_data, aes(x = gdpPercap, y = lifeExp)) +
+  geom_point(aes(color = gdp_level)) +
+geom_smooth(
+    method = "lm",
+    se = FALSE,
+    linetype = "dashed",
+    color = "grey20"
   ) +
-  theme_minimal()
-
-ggsave("fertility_gdp_per_capita_2020.png", width = 8, height = 5)
-
-cl_1990 <- combined_long %>% filter(year == 1990)
-
-ggplot(cl_1990, aes(gdpPercap, babies_per_woman)) +
-  geom_point(alpha = 0.6, color = "steelblue") +
   scale_x_log10() +
-  labs(
-    title = "Fertility Rate vs GDP per Capita (1990)",
-    x = "GDP per Capita (log scale)",
-    y = "Fertility Rate (Babies per Woman)",
-    caption = "Data source: Gapminder (World Bank)"
+  scale_color_manual(
+    values = c(
+      "Low GDP"    = "#F4A582",
+      "Middle GDP" = "#FDBF6F",
+      "High GDP"   = "#7FC97F"
+    )
   ) +
-  theme_minimal()
-
-ggsave("fertility_gdp_per_capita_1990.png", width = 8, height = 5)
+  labs(
+    title   = "GDP vs Life Expectancy",
+    x       = "GDP per Capita (log scale)",
+    y       = "Life Expectancy (years)",
+    color   = "GDP Level"
+  ) +
+  theme_minimal() 
+p1
+ggsave("GDP-vs-Life-Expectancy-scatter.png", width = 8, height = 5)
 
 ```
 
