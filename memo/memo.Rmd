@@ -145,27 +145,48 @@ compare_data <- bind_rows(top3, bottom3)
 
 #### Final Plot 1
 ```{r}
-p1 <- compare_data %>%
-  ggplot(aes(x = reorder(name, lifeExp), y = lifeExp, fill = group)) +
-  geom_col(width = 0.7) +
-  coord_flip() +
-  labs(
-    title = "Life Expectancy: Top 3 vs Bottom 3 GDP per Capita Countries (2021)",
-    x = "Country",
-    y = "Life Expectancy (years)",
-    fill = "Group",
-    caption = "Data source: Gapminder (World Bank)"
-  ) +
-  scale_fill_manual(values = c("Top 3 GDP" = "darkgreen", "Bottom 3 GDP" = "coral")) +
-  theme_minimal() +
-  theme(
-    plot.title = element_text(face = "bold", hjust = 0.5, size = 11),
-    legend.position = "bottom"
+library(dplyr)
+library(ggplot2)
+
+data_2020 <- combined_long %>%
+  filter(year == 2020, !is.na(gdpPercap), !is.na(lifeExp))
+
+plot_data <- data_2020 %>%
+  mutate(
+    gdp_level = ntile(gdpPercap, 3),       
+    gdp_level = factor(
+      gdp_level,
+      levels = c(1, 2, 3),
+      labels = c("Low GDP", "Middle GDP", "High GDP")
+    )
   )
+
+p1 <- ggplot(plot_data, aes(x = gdpPercap, y = lifeExp)) +
+  geom_point(aes(color = gdp_level)) +
+geom_smooth(
+    method = "lm",
+    se = FALSE,
+    linetype = "dashed",
+    color = "grey20"
+  ) +
+  scale_x_log10() +
+  scale_color_manual(
+    values = c(
+      "Low GDP"    = "#F4A582",
+      "Middle GDP" = "#FDBF6F",
+      "High GDP"   = "#7FC97F"
+    )
+  ) +
+  labs(
+    title   = "GDP vs Life Expectancy",
+    x       = "GDP per Capita (log scale)",
+    y       = "Life Expectancy (years)",
+    color   = "GDP Level"
+  ) +
+  theme_minimal() 
 
 p1
 
-ggsave("plot_top_bottom3_gdp_life_expectancy.png", plot = p1, width = 8, height = 5)
 ```
 
 
