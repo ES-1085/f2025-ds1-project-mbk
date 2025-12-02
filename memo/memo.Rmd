@@ -118,7 +118,11 @@ income_colors <- c(
 ---
 
 ## Plots
-### Plot 1: 
+### Plot 1: Murder Rate x GDP Per Capita
+
+```{r}
+
+```
 
 
 ### Plot 2: Life Expectancy x GDP Per Capita
@@ -161,9 +165,10 @@ gdp_life_plot
 ```
 
 
-### Plot 3: ___________
+### Plot 3: Fertility Rate x GDP Per Capita 
 
-Add more plot sections as needed. Each project should have at least 3 plots, but talk to me if you have fewer than 3.
+```{r}
 
-### Plot 4: ___________ 
+```
+
 
