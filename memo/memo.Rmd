@@ -86,19 +86,19 @@ combined_long <- combined_long %>%
 
 ### Step 3: Create Income Group Classification
 
-We classify countries into four income groups based on GDP per capita thresholds from the World Bank. This classification helps visualize patterns across different economic development levels.
+We classify countries into four income groups based on GDP per capita thresholds from the World Bank. This classification will help us visualize patterns across different economic development levels within each of our graphs.
 ```{r create-income-groups}
 combined_long <- combined_long %>%
   mutate(
     income_group = case_when(
-      gdpPercap >= 50000 ~ "High Income",
-      gdpPercap >= 15000 ~ "Upper-Middle Income",
-      gdpPercap >= 4000 ~ "Lower-Middle Income",
-      TRUE ~ "Low Income"
+      gdpPercap >= 50000 ~ "High GDP",
+      gdpPercap >= 15000 ~ "Upper-Middle GDP",
+      gdpPercap >= 4000 ~ "Lower-Middle GDP",
+      TRUE ~ "Low GDP"
     ),
     income_group = factor(
       income_group, 
-      levels = c("Low Income", "Lower-Middle Income", "Upper-Middle Income", "High Income")
+      levels = c("Low GDP", "Lower-Middle GDP", "Upper-Middle GDP", "High GDP")
     )
   )
 ```
@@ -108,10 +108,10 @@ combined_long <- combined_long %>%
 We use a colorblind-friendly palette throughout our visualizations. The colors are distinguishable for people with various types of color vision deficiency and are also labeled in legends for double-coding accessibility.
 ```{r define-color-palette}
 income_colors <- c(
-  "High Income" = "#2A9D8F",
-  "Upper-Middle Income" = "#E9C46A",
-  "Lower-Middle Income" = "#F4A261",
-  "Low Income" = "#E76F51"
+  "High GDP" = "#2A9D8F",
+  "Upper-Middle GDP" = "#E9C46A",
+  "Lower-Middle GDP" = "#F4A261",
+  "Low GDP" = "#E76F51"
 )
 ```
 
@@ -146,10 +146,17 @@ murder_rate_plot <- ggplot(plot_data, aes(x = gdpPercap, y = homicide_rate)) +
   ) +
   labs(
     title = "GDP Per Capita vs Murder Rate",
+    subtitle = "Year: 2020",
     x = "GDP per Capita (log scale)",
     y = "Homicide Rate (per 100k)"
   ) +
-  theme_minimal()
+  theme_minimal() +
+  theme(
+    legend.position = "bottom",
+    legend.text = element_text(size = 9),
+    legend.title = element_blank(),
+    aspect.ratio = .75
+  )
 
 murder_rate_plot
 
@@ -190,7 +197,13 @@ gdp_life_plot <- ggplot(plot_data, aes(x = gdpPercap, y = lifeExp)) +
     x = "GDP per Capita (log scale)",
     y = "Life Expectancy (years)"
   ) +
-  theme_minimal()
+  theme_minimal() +
+  theme(
+    legend.position = "bottom",
+    legend.text = element_text(size = 9),
+    legend.title = element_blank(),
+    aspect.ratio = .75
+)
 
 gdp_life_plot
 
@@ -227,10 +240,17 @@ fertility_rate_plot <- ggplot(plot_data, aes(x = gdpPercap, y = babies_per_woman
   ) +
   labs(
     title = "GDP Per Capita vs Fertility Rate",
+    subtitle = "Year: 2020",
     x = "GDP per Capita (log scale)",
     y = "Fertility Rate (Babies per Woman)"
   ) +
-  theme_minimal()
+  theme_minimal() +
+  theme(
+    legend.position = "bottom",
+    legend.text = element_text(size = 9),
+    legend.title = element_blank(),
+    aspect.ratio = .75
+)
 
 fertility_rate_plot
 
