@@ -257,4 +257,48 @@ fertility_rate_plot
 ggsave("fertility_rate_X_GDP_per_capita_2020.png")
 ```
 
+### Plot 4: Population x GDP Per Capita 
+
+```{r}
+library(dplyr)
+library(ggplot2)
+
+plot_data <- combined_long %>%
+  filter(year == 2020,
+         !is.na(gdpPercap),
+         !is.na(pop))
+
+population_plot <- ggplot(plot_data, aes(x = gdpPercap, y = pop)) +
+  geom_point(aes(color = income_group)) +
+  geom_smooth(
+    method = "lm",
+    se = FALSE,
+    linetype = "dashed",
+    linewidth = 1.1,
+    color = "grey40"
+  ) +
+  scale_x_log10() +
+  scale_color_manual(
+    values = income_colors,
+    drop = FALSE,
+    name = "Income Group"
+  ) +
+  labs(
+    title = "GDP Per Capita vs Population Size",
+    subtitle = "Year: 2020",
+    x = "GDP per Capita (log scale)",
+    y = "Population Size"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "bottom",
+    legend.text = element_text(size = 9),
+    legend.title = element_blank(),
+    aspect.ratio = .75
+)
+
+population_plot
+
+ggsave("population_X_GDP_per_capita_2020.png")
+```
 
