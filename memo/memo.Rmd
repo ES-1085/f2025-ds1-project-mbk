@@ -123,7 +123,6 @@ income_colors <- c(
 ```{r}
 library(dplyr)
 library(ggplot2)
-library(ggrepel)
 
 plot_data <- combined_long %>%
   filter(year == 2020,
@@ -203,7 +202,39 @@ ggsave("life_expectancy_X_GDP_per_capita_2020.png")
 ### Plot 3: Fertility Rate x GDP Per Capita 
 
 ```{r}
+library(dplyr)
+library(ggplot2)
 
+plot_data <- combined_long %>%
+  filter(year == 2020,
+         !is.na(gdpPercap),
+         !is.na(babies_per_woman))
+
+fertility_rate_plot <- ggplot(plot_data, aes(x = gdpPercap, y = babies_per_woman)) +
+  geom_point(aes(color = income_group)) +
+  geom_smooth(
+    method = "lm",
+    se = FALSE,
+    linetype = "dashed",
+    linewidth = 1.1,
+    color = "grey40"
+  ) +
+  scale_x_log10() +
+  scale_color_manual(
+    values = income_colors,
+    drop = FALSE,
+    name = "Income Group"
+  ) +
+  labs(
+    title = "GDP Per Capita vs Fertility Rate",
+    x = "GDP per Capita (log scale)",
+    y = "Fertility Rate (Babies per Woman)"
+  ) +
+  theme_minimal()
+
+fertility_rate_plot
+
+ggsave("fertility_rate_X_GDP_per_capita_2020.png")
 ```
 
 
