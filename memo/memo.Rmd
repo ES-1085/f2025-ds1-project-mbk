@@ -121,7 +121,40 @@ income_colors <- c(
 ### Plot 1: Murder Rate x GDP Per Capita
 
 ```{r}
+library(dplyr)
+library(ggplot2)
+library(ggrepel)
 
+plot_data <- combined_long %>%
+  filter(year == 2020,
+         !is.na(gdpPercap),
+         !is.na(homicide_rate))
+
+murder_rate_plot <- ggplot(plot_data, aes(x = gdpPercap, y = homicide_rate)) +
+  geom_point(aes(color = income_group)) +
+  geom_smooth(
+    method = "lm",
+    se = FALSE,
+    linetype = "dashed",
+    linewidth = 1.1,
+    color = "grey40"
+  ) +
+  scale_x_log10() +
+  scale_color_manual(
+    values = income_colors,
+    drop = FALSE,
+    name = "Income Group"
+  ) +
+  labs(
+    title = "GDP Per Capita vs Murder Rate",
+    x = "GDP per Capita (log scale)",
+    y = "Homicide Rate (per 100k)"
+  ) +
+  theme_minimal()
+
+murder_rate_plot
+
+ggsave("murder_rate_X_GDP_per_capita_2020")
 ```
 
 
@@ -153,14 +186,16 @@ gdp_life_plot <- ggplot(plot_data, aes(x = gdpPercap, y = lifeExp)) +
     name = "Income Group"
   ) +
   labs(
-    title    = "GDP vs Life Expectancy",
+    title = "GDP vs Life Expectancy",
     subtitle = "Year: 2020",
-    x        = "GDP per Capita (log scale)",
-    y        = "Life Expectancy (years)"
+    x = "GDP per Capita (log scale)",
+    y = "Life Expectancy (years)"
   ) +
   theme_minimal()
 
 gdp_life_plot
+
+ggsave("life_expectancy_X_GDP_per_capita_2020")
 
 ```
 
