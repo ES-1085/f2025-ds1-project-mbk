@@ -154,7 +154,7 @@ murder_rate_plot <- ggplot(plot_data, aes(x = gdpPercap, y = homicide_rate)) +
 
 murder_rate_plot
 
-ggsave("murder_rate_X_GDP_per_capita_2020")
+ggsave("murder_rate_X_GDP_per_capita_2020.png")
 ```
 
 
@@ -195,7 +195,7 @@ gdp_life_plot <- ggplot(plot_data, aes(x = gdpPercap, y = lifeExp)) +
 
 gdp_life_plot
 
-ggsave("life_expectancy_X_GDP_per_capita_2020")
+ggsave("life_expectancy_X_GDP_per_capita_2020.png")
 
 ```
 
