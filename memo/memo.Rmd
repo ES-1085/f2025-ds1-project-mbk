@@ -304,8 +304,7 @@ ggsave("population_X_GDP_per_capita_2020.png")
 ```
 
 
-### Calculating differences 
-
+### Calculating differences
 ```{r}
 # Wealthiest Country
 wealthiest <- combined_long %>%
@@ -334,4 +333,6 @@ pop_difference
 #Fertility Difference
 fertility_difference <- wealthiest$babies_per_woman - poorest$babies_per_woman
 fertility_difference
+
+```
 ```
