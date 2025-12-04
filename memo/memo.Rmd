@@ -303,3 +303,35 @@ ggsave("population_X_GDP_per_capita_2020.png")
 ```
 ```
 
+
+### Calculating differences 
+
+```{r}
+# Wealthiest Country
+wealthiest <- combined_long %>%
+  filter(year == 2020) %>%
+  slice_max(gdpPercap, n = 1) %>%
+  select(name, gdpPercap, lifeExp, pop, babies_per_woman, homicide_rate)
+
+#Poorest Country
+poorest <- combined_long %>%
+  filter(year == 2020) %>%
+  slice_min(gdpPercap, n = 1) %>%
+  select(name, gdpPercap, lifeExp, pop, babies_per_woman, homicide_rate)
+
+#GDP Difference Between Wealthiest and Poorest Countries
+gdp_difference <- wealthiest$gdpPercap - poorest$gdpPercap
+gdp_difference
+
+#Life Expectancy Difference
+life_expectancy_difference <- wealthiest$lifeExp - poorest$lifeExp
+life_expectancy_difference
+
+#Population Difference
+pop_difference <- wealthiest$pop - poorest$pop
+pop_difference
+
+#Fertility Difference
+fertility_difference <- wealthiest$babies_per_woman - poorest$babies_per_woman
+fertility_difference
+```

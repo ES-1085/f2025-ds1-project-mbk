@@ -2,12 +2,10 @@ Project memo
 ================
 Team name
 
-This document should contain a detailed account of the data clean up for
-your data and the design choices you are making for your plots. For
-instance you will want to document choices you’ve made that were
-intentional for your graphic, e.g. color you’ve chosen for the plot.
-Think of this document as a code script someone can follow to reproduce
-the data cleaning steps and graphics in your handout.
+This document contains a detailed account of the data cleanup steps and
+design choices for our visualizations exploring the relationship between
+GDP per capita and social outcomes (homicide rates, life expectancy, and
+fertility) across countries from 1990-2021.
 
 ``` r
 library(tidyverse)
@@ -20,72 +18,17 @@ library(scales)
 
 ### Step 1: Load and Pivot Individual Datasets to Long Format
 
+We load five separate Gapminder datasets and convert each from wide
+format (years as columns) to long format (year as a variable) for easier
+analysis and merging.
+
 ``` r
 homicide <- read_csv("../data/murder_total_deaths.csv")
-```
-
-    ## Rows: 193 Columns: 34
-    ## ── Column specification ────────────────────────────────────────────────────────
-    ## Delimiter: ","
-    ## chr  (2): geo, name
-    ## dbl (32): 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, ...
-    ## 
-    ## ℹ Use `spec()` to retrieve the full column specification for this data.
-    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-
-``` r
 life <- read_csv("../data/lex.csv")
-```
-
-    ## Rows: 194 Columns: 303
-    ## ── Column specification ────────────────────────────────────────────────────────
-    ## Delimiter: ","
-    ## chr   (2): geo, name
-    ## dbl (301): 1800, 1801, 1802, 1803, 1804, 1805, 1806, 1807, 1808, 1809, 1810,...
-    ## 
-    ## ℹ Use `spec()` to retrieve the full column specification for this data.
-    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-
-``` r
 gdp_per_capita <- read_csv("../data/gdp_pcap.csv")
-```
-
-    ## Rows: 193 Columns: 303
-    ## ── Column specification ────────────────────────────────────────────────────────
-    ## Delimiter: ","
-    ## chr   (2): geo, name
-    ## dbl (301): 1800, 1801, 1802, 1803, 1804, 1805, 1806, 1807, 1808, 1809, 1810,...
-    ## 
-    ## ℹ Use `spec()` to retrieve the full column specification for this data.
-    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-
-``` r
 babies_per_woman <- read_csv("../data/children_per_woman_total_fertility.csv")
-```
-
-    ## Rows: 195 Columns: 303
-    ## ── Column specification ────────────────────────────────────────────────────────
-    ## Delimiter: ","
-    ## chr   (2): geo, name
-    ## dbl (301): 1800, 1801, 1802, 1803, 1804, 1805, 1806, 1807, 1808, 1809, 1810,...
-    ## 
-    ## ℹ Use `spec()` to retrieve the full column specification for this data.
-    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-
-``` r
 population <- read_csv("../data/pop.csv")
-```
 
-    ## Rows: 195 Columns: 303
-    ## ── Column specification ────────────────────────────────────────────────────────
-    ## Delimiter: ","
-    ## chr   (2): geo, name
-    ## dbl (301): 1800, 1801, 1802, 1803, 1804, 1805, 1806, 1807, 1808, 1809, 1810,...
-    ## 
-    ## ℹ Use `spec()` to retrieve the full column specification for this data.
-    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-
-``` r
 homicide_long <- homicide %>%
   pivot_longer(
     cols = -c(geo, name),
@@ -148,109 +91,325 @@ combined_long <- combined_long %>%
   ungroup()
 ```
 
+### Step 3: Create Income Group Classification
+
+We classify countries into four income groups based on GDP per capita
+thresholds from the World Bank. This classification will help us
+visualize patterns across different economic development levels within
+each of our graphs.
+
+``` r
+combined_long <- combined_long %>%
+  mutate(
+    income_group = case_when(
+      gdpPercap >= 50000 ~ "High GDP",
+      gdpPercap >= 15000 ~ "Upper-Middle GDP",
+      gdpPercap >= 4000 ~ "Lower-Middle GDP",
+      TRUE ~ "Low GDP"
+    ),
+    income_group = factor(
+      income_group, 
+      levels = c("Low GDP", "Lower-Middle GDP", "Upper-Middle GDP", "High GDP")
+    )
+  )
+```
+
+## Color Palette
+
+We use a colorblind-friendly palette throughout our visualizations. The
+colors are distinguishable for people with various types of color vision
+deficiency and are also labeled in legends for double-coding
+accessibility.
+
+``` r
+income_colors <- c(
+  "High GDP" = "#2A9D8F",
+  "Upper-Middle GDP" = "#E9C46A",
+  "Lower-Middle GDP" = "#F4A261",
+  "Low GDP" = "#E76F51"
+)
+```
+
+------------------------------------------------------------------------
+
 ## Plots
 
-### ggsave example for saving plots
+### Plot 1: Murder Rate x GDP Per Capita
 
 ``` r
-p1 <- starwars |>
-  filter(mass < 1000, 
-         species %in% c("Human", "Cerean", "Pau'an", "Droid", "Gungan")) |>
-  ggplot() +
-  geom_point(aes(x = mass, 
-                 y = height, 
-                 color = species)) +
-  labs(x = "Weight (kg)", 
-       y = "Height (m)",
-       color = "Species",
-       title = "Weight and Height of Select Starwars Species",
-       caption = paste("This data comes from the starwars api: https://swapi.py43.com"))
+library(dplyr)
+library(ggplot2)
 
+plot_data <- combined_long %>%
+  filter(year == 2020,
+         !is.na(gdpPercap),
+         !is.na(homicide_rate))
 
-ggsave("example-starwars.png", width = 4, height = 4)
-
-ggsave("example-starwars-wide.png", width = 6, height = 4)
-```
-
-### Plot 1: Life Expectancy Comparison - Top 3 vs Bottom 3 GDP Countries
-
-This bar chart provides a direct comparison of life expectancy between
-the world’s wealthiest and poorest countries in 2021, clearly
-illustrating the health gap associated with economic development.
-
-Design choices: - **2021 focus**: Uses the most recent year in the
-dataset for current relevance - **Top 3 vs Bottom 3 comparison**:
-Highlights the extremes to show the maximum health disparity between
-richest and poorest nations - **Horizontal bars (coord_flip)**: Country
-names are easier to read horizontally, and bars naturally show
-magnitude - **Ordered by life expectancy**: Countries arranged from
-lowest to highest life expectancy for intuitive reading - **Color
-contrast**: Dark green for wealthy countries and coral for poor
-countries creates clear visual separation between groups - **Legend at
-bottom**: Keeps the focus on the bars while maintaining clarity about
-what each color represents - **Centered bold title**: Emphasizes the
-comparison being made - **Minimal theme**: Clean, professional
-appearance without distracting elements
-
-#### Data cleanup steps specific to plot 1
-
-Filter to 2021 data only, then identify the top 3 and bottom 3 countries
-by GDP per capita.
-
-``` r
-plot1_data <- combined_long %>%
-  filter(!is.na(gdpPercap), !is.na(lifeExp), year == 2021)
-
-# Find top 3 and bottom 3 countries by GDP per capita
-top3 <- plot1_data %>%
-  arrange(desc(gdpPercap)) %>%
-  slice_head(n = 3) %>%
-  mutate(group = "Top 3 GDP")
-
-bottom3 <- plot1_data %>%
-  arrange(gdpPercap) %>%
-  slice_head(n = 3) %>%
-  mutate(group = "Bottom 3 GDP")
-
-# Combine the two sets
-compare_data <- bind_rows(top3, bottom3)
-```
-
-#### Final Plot 1
-
-``` r
-p1 <- compare_data %>%
-  ggplot(aes(x = reorder(name, lifeExp), y = lifeExp, fill = group)) +
-  geom_col(width = 0.7) +
-  coord_flip() +
-  labs(
-    title = "Life Expectancy: Top 3 vs Bottom 3 GDP per Capita Countries (2021)",
-    x = "Country",
-    y = "Life Expectancy (years)",
-    fill = "Group",
-    caption = "Data source: Gapminder (World Bank)"
+murder_rate_plot <- ggplot(plot_data, aes(x = gdpPercap, y = homicide_rate)) +
+  geom_point(aes(color = income_group)) +
+  geom_smooth(
+    method = "lm",
+    se = FALSE,
+    linetype = "dashed",
+    linewidth = 1.1,
+    color = "grey40"
   ) +
-  scale_fill_manual(values = c("Top 3 GDP" = "darkgreen", "Bottom 3 GDP" = "coral")) +
+  scale_x_log10() +
+  scale_color_manual(
+    values = income_colors,
+    drop = FALSE,
+    name = "Income Group"
+  ) +
+  labs(
+    title = "GDP Per Capita vs Murder Rate",
+    subtitle = "Year: 2020",
+    x = "GDP per Capita (log scale)",
+    y = "Homicide Rate (per 100k)"
+  ) +
   theme_minimal() +
   theme(
-    plot.title = element_text(face = "bold", hjust = 0.5, size = 11),
-    legend.position = "bottom"
+    legend.position = "bottom",
+    legend.text = element_text(size = 9),
+    legend.title = element_blank(),
+    aspect.ratio = .75
   )
 
-p1
+murder_rate_plot
 ```
+
+    ## `geom_smooth()` using formula = 'y ~ x'
+
+![](memo_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
+
+``` r
+ggsave("murder_rate_X_GDP_per_capita_2020.png")
+```
+
+    ## Saving 7 x 5 in image
+    ## `geom_smooth()` using formula = 'y ~ x'
+
+### Plot 2: Life Expectancy x GDP Per Capita
+
+``` r
+library(dplyr)
+library(ggplot2)
+
+plot_data <- combined_long %>%   
+  filter(year == 2020,
+         !is.na(gdpPercap),
+         !is.na(lifeExp))
+
+gdp_life_plot <- ggplot(plot_data, aes(x = gdpPercap, y = lifeExp)) +
+  geom_point(aes(color = income_group)) +
+  geom_smooth(
+    method = "lm",
+    se = FALSE,
+    linetype = "dashed",
+    linewidth = 1.1,
+    color = "grey40"
+  ) +
+  scale_x_log10() +
+  scale_color_manual(
+    values = income_colors,
+    drop = FALSE,
+    name = "Income Group"
+  ) +
+  labs(
+    title = "GDP vs Life Expectancy",
+    subtitle = "Year: 2020",
+    x = "GDP per Capita (log scale)",
+    y = "Life Expectancy (years)"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "bottom",
+    legend.text = element_text(size = 9),
+    legend.title = element_blank(),
+    aspect.ratio = .75
+)
+
+gdp_life_plot
+```
+
+    ## `geom_smooth()` using formula = 'y ~ x'
+
+![](memo_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
+
+``` r
+ggsave("life_expectancy_X_GDP_per_capita_2020.png")
+```
+
+    ## Saving 7 x 5 in image
+    ## `geom_smooth()` using formula = 'y ~ x'
+
+### Plot 3: Fertility Rate x GDP Per Capita
+
+``` r
+library(dplyr)
+library(ggplot2)
+
+plot_data <- combined_long %>%
+  filter(year == 2020,
+         !is.na(gdpPercap),
+         !is.na(babies_per_woman))
+
+fertility_rate_plot <- ggplot(plot_data, aes(x = gdpPercap, y = babies_per_woman)) +
+  geom_point(aes(color = income_group)) +
+  geom_smooth(
+    method = "lm",
+    se = FALSE,
+    linetype = "dashed",
+    linewidth = 1.1,
+    color = "grey40"
+  ) +
+  scale_x_log10() +
+  scale_color_manual(
+    values = income_colors,
+    drop = FALSE,
+    name = "Income Group"
+  ) +
+  labs(
+    title = "GDP Per Capita vs Fertility Rate",
+    subtitle = "Year: 2020",
+    x = "GDP per Capita (log scale)",
+    y = "Fertility Rate (Babies per Woman)"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "bottom",
+    legend.text = element_text(size = 9),
+    legend.title = element_blank(),
+    aspect.ratio = .75
+)
+
+fertility_rate_plot
+```
+
+    ## `geom_smooth()` using formula = 'y ~ x'
+
+![](memo_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
+
+``` r
+ggsave("fertility_rate_X_GDP_per_capita_2020.png")
+```
+
+    ## Saving 7 x 5 in image
+    ## `geom_smooth()` using formula = 'y ~ x'
+
+### Plot 4: Population x GDP Per Capita
+
+``` r
+library(dplyr)
+library(ggplot2)
+
+plot_data <- combined_long %>%
+  filter(year == 2020,
+         !is.na(gdpPercap),
+         !is.na(pop))
+
+population_plot <- ggplot(plot_data, aes(x = gdpPercap, y = pop)) +
+  geom_point(aes(color = income_group)) +
+  geom_smooth(
+    method = "lm",
+    se = FALSE,
+    linetype = "dashed",
+    linewidth = 1.1,
+    color = "grey40"
+  ) +
+  scale_x_log10() +
+  scale_color_manual(
+    values = income_colors,
+    drop = FALSE,
+    name = "Income Group"
+  ) +
+  labs(
+    title = "GDP Per Capita vs Population Size",
+    subtitle = "Year: 2020",
+    x = "GDP per Capita (log scale)",
+    y = "Population Size"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "bottom",
+    legend.text = element_text(size = 9),
+    legend.title = element_blank(),
+    aspect.ratio = .75
+)
+
+population_plot
+```
+
+    ## `geom_smooth()` using formula = 'y ~ x'
 
 ![](memo_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
 ``` r
-ggsave("plot_top_bottom3_gdp_life_expectancy.png", plot = p1, width = 8, height = 5)
+ggsave("population_X_GDP_per_capita_2020.png")
 ```
 
-### Plot 2: \_\_\_\_\_\_\_\_\_
+    ## Saving 7 x 5 in image
+    ## `geom_smooth()` using formula = 'y ~ x'
 
-### Plot 3: \_\_\_\_\_\_\_\_\_\_\_
+### Calculating differences
 
-Add more plot sections as needed. Each project should have at least 3
-plots, but talk to me if you have fewer than 3.
+``` r
+# Wealthiest Country
+wealthiest <- combined_long %>%
+  filter(year == 2020) %>%
+  slice_max(gdpPercap, n = 1) %>%
+  select(name, gdpPercap, lifeExp, pop, babies_per_woman, homicide_rate)
 
-### Plot 4: \_\_\_\_\_\_\_\_\_\_\_
+#Poorest Country
+poorest <- combined_long %>%
+  filter(year == 2020) %>%
+  slice_min(gdpPercap, n = 1) %>%
+  select(name, gdpPercap, lifeExp, pop, babies_per_woman, homicide_rate)
+
+wealthiest
+```
+
+    ## # A tibble: 1 × 6
+    ##   name   gdpPercap lifeExp   pop babies_per_woman homicide_rate
+    ##   <chr>      <dbl>   <dbl> <dbl>            <dbl>         <dbl>
+    ## 1 Monaco   207845.    80.1 38050             2.38          0.13
+
+``` r
+poorest
+```
+
+    ## # A tibble: 1 × 6
+    ##   name        gdpPercap lifeExp      pop babies_per_woman homicide_rate
+    ##   <chr>           <dbl>   <dbl>    <dbl>            <dbl>         <dbl>
+    ## 1 South Sudan      387.    63.2 10698467             4.16         1718.
+
+``` r
+#GDP Difference Between Wealthiest and Poorest Countries
+gdp_difference <- wealthiest$gdpPercap - poorest$gdpPercap
+gdp_difference
+```
+
+    ## [1] 207458
+
+``` r
+#Life Expectancy Difference
+life_expectancy_difference <- wealthiest$lifeExp - poorest$lifeExp
+life_expectancy_difference
+```
+
+    ## [1] 16.81
+
+``` r
+#Population Difference
+pop_difference <- wealthiest$pop - poorest$pop
+pop_difference
+```
+
+    ## [1] -10660417
+
+``` r
+#Fertility Difference
+fertility_difference <- wealthiest$babies_per_woman - poorest$babies_per_woman
+fertility_difference
+```
+
+    ## [1] -1.78
