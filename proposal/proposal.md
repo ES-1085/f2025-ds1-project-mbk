@@ -1,67 +1,91 @@
-Project proposal
+Project memo
 ================
-Team MBK
+Team name
+
+This document should contain a detailed account of the data clean up for
+your data and the design choices you are making for your plots. For
+instance you will want to document choices you’ve made that were
+intentional for your graphic, e.g. color you’ve chosen for the plot.
+Think of this document as a code script someone can follow to reproduce
+the data cleaning steps and graphics in your handout.
 
 ``` r
 library(tidyverse)
-library(gapminder)
 library(broom)
-library(skimr)
-library(dplyr)
 library(readr)
+library(scales)
 ```
 
-## 1. Introduction
+## Data Clean Up Steps for Overall Data
 
-Our project will look at how social and economic patterns have changed
-in different countries over time. We plan to use merged datasets found
-on Gapminder that track social and economic indicators (like population,
-GDP per Capita, fertility rates, and murder rates) in different
-countries over time.
-
-Overarching research question: - How does GDP per capita relate to
-social outcomes like life expectancy, fertility rates, population
-growth, and murder rates across countries between 1990 and 2021?
-
-Each row in each dataset taken from Gapminder represents a country in a
-given year, and each column represents the count or percent for the
-given variable in that year. We merged datasets focused on the variables
-life expectancy, population, babies per woman, murder rate, and GDP per
-capita into one dataset. In the merged data set, each row represents a
-country in a given year, and the columns represent the rate or
-percentage experienced during that year. The variables are homicide
-rate, life expectancy, GDP per capita, babies per woman, population, GDP
-growth percentage (measured as the percent change in GDP from the
-previous year to the current year), and population growth percentage
-(measured as the percent change in population from the previous year to
-the current year).
-
-The Gapminder datasets collect data from publicly available data from
-the World Bank. Data source: <https://www.gapminder.org/data/>
-
-## 2. Data
-
-Creating our merged dataset:
+### Step 1: Load and Pivot Individual Datasets to Long Format
 
 ``` r
 homicide <- read_csv("../data/murder_total_deaths.csv")
+```
+
+    ## Rows: 193 Columns: 34
+    ## ── Column specification ────────────────────────────────────────────────────────
+    ## Delimiter: ","
+    ## chr  (2): geo, name
+    ## dbl (32): 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, ...
+    ## 
+    ## ℹ Use `spec()` to retrieve the full column specification for this data.
+    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+
+``` r
 life <- read_csv("../data/lex.csv")
+```
+
+    ## Rows: 194 Columns: 303
+    ## ── Column specification ────────────────────────────────────────────────────────
+    ## Delimiter: ","
+    ## chr   (2): geo, name
+    ## dbl (301): 1800, 1801, 1802, 1803, 1804, 1805, 1806, 1807, 1808, 1809, 1810,...
+    ## 
+    ## ℹ Use `spec()` to retrieve the full column specification for this data.
+    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+
+``` r
 gdp_per_capita <- read_csv("../data/gdp_pcap.csv")
+```
+
+    ## Rows: 193 Columns: 303
+    ## ── Column specification ────────────────────────────────────────────────────────
+    ## Delimiter: ","
+    ## chr   (2): geo, name
+    ## dbl (301): 1800, 1801, 1802, 1803, 1804, 1805, 1806, 1807, 1808, 1809, 1810,...
+    ## 
+    ## ℹ Use `spec()` to retrieve the full column specification for this data.
+    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+
+``` r
 babies_per_woman <- read_csv("../data/children_per_woman_total_fertility.csv")
+```
+
+    ## Rows: 195 Columns: 303
+    ## ── Column specification ────────────────────────────────────────────────────────
+    ## Delimiter: ","
+    ## chr   (2): geo, name
+    ## dbl (301): 1800, 1801, 1802, 1803, 1804, 1805, 1806, 1807, 1808, 1809, 1810,...
+    ## 
+    ## ℹ Use `spec()` to retrieve the full column specification for this data.
+    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+
+``` r
 population <- read_csv("../data/pop.csv")
+```
 
-<<<<<<< HEAD
-library(readr)
-# Read in your data file
-# Print the output of glimpse() or skim()
-=======
+    ## Rows: 195 Columns: 303
+    ## ── Column specification ────────────────────────────────────────────────────────
+    ## Delimiter: ","
+    ## chr   (2): geo, name
+    ## dbl (301): 1800, 1801, 1802, 1803, 1804, 1805, 1806, 1807, 1808, 1809, 1810,...
+    ## 
+    ## ℹ Use `spec()` to retrieve the full column specification for this data.
+    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 
-
-library(readr)
-
-
->>>>>>> 01e20864d5bc4e9cc67d867278ed4445d4b1dcae
-## Pivot the data into long form
+``` r
 homicide_long <- homicide %>%
   pivot_longer(
     cols = -c(geo, name),
@@ -83,7 +107,6 @@ gdp_long <- gdp_per_capita %>%
     values_to = "gdpPercap"
   ) 
 
-
 babies_per_woman_long <- babies_per_woman %>%
   pivot_longer(
     cols = -c(geo, name),
@@ -96,19 +119,27 @@ pop_long <- population %>%
     cols = -c(geo, name),
     names_to  = "year",
     values_to = "pop"
-  ) 
+  )
+```
 
-#Merge Datasets
+### Step 2: Merge Datasets and Filter Years
+
+We merge all five datasets using full joins to preserve all country-year
+observations, then filter to focus on 1990-2021. We also calculate
+growth rates for GDP and population.
+
+``` r
 combined_long <- homicide_long %>%
-  full_join(life_long,      by = c("geo", "name", "year")) %>%
-  full_join(gdp_long,       by = c("geo", "name", "year")) %>%
+  full_join(life_long, by = c("geo", "name", "year")) %>%
+  full_join(gdp_long, by = c("geo", "name", "year")) %>%
   full_join(babies_per_woman_long, by = c("geo", "name", "year")) %>%
-  full_join(pop_long,       by = c("geo", "name", "year"))
+  full_join(pop_long, by = c("geo", "name", "year"))
 
 combined_long <- combined_long %>%
   filter(year >= 1990 & year <= 2021)
 
 combined_long <- combined_long %>%
+  mutate(year = as.numeric(year)) %>%
   group_by(geo) %>% 
   mutate(
     gdp_growth_percent = (gdpPercap - lag(gdpPercap)) / lag(gdpPercap) * 100,
@@ -117,156 +148,180 @@ combined_long <- combined_long %>%
   ungroup()
 ```
 
-Glimpse:
+## Plots
+
+### ggsave example for saving plots
 
 ``` r
-glimpse(combined_long)
+p1 <- starwars |>
+  filter(mass < 1000, 
+         species %in% c("Human", "Cerean", "Pau'an", "Droid", "Gungan")) |>
+  ggplot() +
+  geom_point(aes(x = mass, 
+                 y = height, 
+                 color = species)) +
+  labs(x = "Weight (kg)", 
+       y = "Height (m)",
+       color = "Species",
+       title = "Weight and Height of Select Starwars Species",
+       caption = paste("This data comes from the starwars api: https://swapi.py43.com"))
+
+
+ggsave("example-starwars.png", width = 4, height = 4)
+
+ggsave("example-starwars-wide.png", width = 6, height = 4)
 ```
 
-    ## Rows: 6,240
-    ## Columns: 10
-    ## $ geo                <chr> "afg", "afg", "afg", "afg", "afg", "afg", "afg", "a…
-    ## $ name               <chr> "Afghanistan", "Afghanistan", "Afghanistan", "Afgha…
-    ## $ year               <chr> "1990", "1991", "1992", "1993", "1994", "1995", "19…
-    ## $ homicide_rate      <dbl> 1271.93, 1463.88, 1371.31, 1493.86, 1826.50, 1980.5…
-    ## $ lifeExp            <dbl> 53.83, 53.76, 54.24, 54.40, 53.89, 54.33, 54.69, 54…
-    ## $ gdpPercap          <dbl> 1845.1384, 1705.5056, 1650.7992, 1142.2317, 854.564…
-    ## $ babies_per_woman   <dbl> 7.58, 7.63, 7.70, 7.76, 7.77, 7.77, 7.76, 7.73, 7.6…
-    ## $ pop                <dbl> 12045660, 12238879, 13278974, 14943172, 16250794, 1…
-    ## $ gdp_growth_percent <dbl> NA, -7.5676089, -3.2076342, -30.8073508, -25.184687…
-    ## $ pop_growth_percent <dbl> NA, 1.6040549, 8.4982865, 12.5325797, 8.7506321, 5.…
+### Plot 1: Life Expectancy Comparison - Top 3 vs Bottom 3 GDP Countries
 
-Skim:
+This bar chart provides a direct comparison of life expectancy between
+the world’s wealthiest and poorest countries in 2021, clearly
+illustrating the health gap associated with economic development.
+
+Design choices: - **2021 focus**: Uses the most recent year in the
+dataset for current relevance - **Top 3 vs Bottom 3 comparison**:
+Highlights the extremes to show the maximum health disparity between
+richest and poorest nations - **Horizontal bars (coord_flip)**: Country
+names are easier to read horizontally, and bars naturally show
+magnitude - **Ordered by life expectancy**: Countries arranged from
+lowest to highest life expectancy for intuitive reading - **Color
+contrast**: Dark green for wealthy countries and coral for poor
+countries creates clear visual separation between groups - **Legend at
+bottom**: Keeps the focus on the bars while maintaining clarity about
+what each color represents - **Centered bold title**: Emphasizes the
+comparison being made - **Minimal theme**: Clean, professional
+appearance without distracting elements
+
+#### Data cleanup steps specific to plot 1
+
+Filter to 2021 data only, then identify the top 3 and bottom 3 countries
+by GDP per capita.
 
 ``` r
-skim(combined_long)
+plot1_data <- combined_long %>%
+  filter(!is.na(gdpPercap), !is.na(lifeExp), year == 2021)
+
+# Find top 3 and bottom 3 countries by GDP per capita
+top3 <- plot1_data %>%
+  arrange(desc(gdpPercap)) %>%
+  slice_head(n = 3) %>%
+  mutate(group = "Top 3 GDP")
+
+bottom3 <- plot1_data %>%
+  arrange(gdpPercap) %>%
+  slice_head(n = 3) %>%
+  mutate(group = "Bottom 3 GDP")
+
+# Combine the two sets
+compare_data <- bind_rows(top3, bottom3)
 ```
 
-|                                                  |               |
-|:-------------------------------------------------|:--------------|
-| Name                                             | combined_long |
-| Number of rows                                   | 6240          |
-| Number of columns                                | 10            |
-| \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_   |               |
-| Column type frequency:                           |               |
-| character                                        | 3             |
-| numeric                                          | 7             |
-| \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ |               |
-| Group variables                                  | None          |
-
-Data summary
-
-**Variable type: character**
-
-| skim_variable | n_missing | complete_rate | min | max | empty | n_unique | whitespace |
-|:--------------|----------:|--------------:|----:|----:|------:|---------:|-----------:|
-| geo           |         0 |             1 |   3 |   3 |     0 |      195 |          0 |
-| name          |         0 |             1 |   2 |  30 |     0 |      195 |          0 |
-| year          |         0 |             1 |   4 |   4 |     0 |       32 |          0 |
-
-**Variable type: numeric**
-
-| skim_variable | n_missing | complete_rate | mean | sd | p0 | p25 | p50 | p75 | p100 | hist |
-|:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|:---|
-| homicide_rate | 64 | 0.99 | 2138.26 | 6892.56 | 0.07 | 54.33 | 292.80 | 909.38 | 6.816141e+04 | ▇▁▁▁▁ |
-| lifeExp | 34 | 0.99 | 69.17 | 8.84 | 9.50 | 63.28 | 70.88 | 75.73 | 8.516000e+01 | ▁▁▁▆▇ |
-| gdpPercap | 64 | 0.99 | 17000.74 | 21410.25 | 386.68 | 3298.54 | 9304.18 | 22509.14 | 2.101110e+05 | ▇▁▁▁▁ |
-| babies_per_woman | 0 | 1.00 | 3.15 | 1.68 | 0.78 | 1.76 | 2.64 | 4.35 | 8.610000e+00 | ▇▅▃▂▁ |
-| pop | 21 | 1.00 | 33995756.75 | 129810929\.15 | 769.00 | 1535802.50 | 6876385.00 | 22118374.00 | 1.426437e+09 | ▇▁▁▁▁ |
-| gdp_growth_percent | 257 | 0.96 | 1.86 | 6.67 | -63.32 | -0.14 | 2.18 | 4.44 | 1.280600e+02 | ▁▇▁▁▁ |
-| pop_growth_percent | 216 | 0.97 | 1.47 | 1.72 | -19.79 | 0.45 | 1.36 | 2.41 | 2.423000e+01 | ▁▁▇▁▁ |
-
-## 3. Data analysis plan
-
-Text goes here. - What variables will you visualize to explore your
-research questions?
-
-We will visualize relationships between GDP per capita and life
-expectancy, fertility rate, homicide rate, population growth, and GDP
-growth to find out whether higher income levels are associated with
-longer lives, lower crime, smaller families, and slower population
-growth.
-
-- Will there be any other data that you need to find to help with your
-  research question?
-
-We won’t need any more data to help with our research question at this
-stage, but it’s possible that that will arise later on.
-
-- Very preliminary exploratory data analysis, including some summary
-  statistics and visualizations, along with some explanation on how they
-  help you learn more about your data. (You can add to these later as
-  you work on your project.)
-
-The first summary statistic displays statistics by variable. The second
-summary statistic displays summary statistics by country in descending
-order of mean GDP.
-
-The visualization below shows the relationship of GDP per Capita to Life
-Expectancy. We will create more of these for each variable later to
-examine a correlation. We will also created stacked bar charts with top
-countries compared to bottom countries to visually see how variables
-related to GDP per Capita
-
-- The data visualization(s) that you believe will be useful in exploring
-  your question(s). (You can update these later as you work on your
-  project.)
+#### Final Plot 1
 
 ``` r
-# Code to calculate summary statistics
+p1 <- compare_data %>%
+  ggplot(aes(x = reorder(name, lifeExp), y = lifeExp, fill = group)) +
+  geom_col(width = 0.7) +
+  coord_flip() +
+  labs(
+    title = "Life Expectancy: Top 3 vs Bottom 3 GDP per Capita Countries (2021)",
+    x = "Country",
+    y = "Life Expectancy (years)",
+    fill = "Group",
+    caption = "Data source: Gapminder (World Bank)"
+  ) +
+  scale_fill_manual(values = c("Top 3 GDP" = "darkgreen", "Bottom 3 GDP" = "coral")) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", hjust = 0.5, size = 11),
+    legend.position = "bottom"
+  )
 
-#Summary Stats by Variable
-combined_long %>%
-select(gdpPercap, lifeExp, babies_per_woman, homicide_rate, gdp_growth_percent, pop_growth_percent) %>%
-summary()
+p1
 ```
 
-    ##    gdpPercap           lifeExp      babies_per_woman homicide_rate     
-    ##  Min.   :   386.7   Min.   : 9.50   Min.   :0.780    Min.   :    0.07  
-    ##  1st Qu.:  3298.5   1st Qu.:63.28   1st Qu.:1.758    1st Qu.:   54.33  
-    ##  Median :  9304.2   Median :70.89   Median :2.640    Median :  292.80  
-    ##  Mean   : 17000.7   Mean   :69.17   Mean   :3.151    Mean   : 2138.26  
-    ##  3rd Qu.: 22509.1   3rd Qu.:75.73   3rd Qu.:4.353    3rd Qu.:  909.38  
-    ##  Max.   :210111.0   Max.   :85.16   Max.   :8.610    Max.   :68161.41  
-    ##  NA's   :64         NA's   :34                       NA's   :64        
-    ##  gdp_growth_percent pop_growth_percent
-    ##  Min.   :-63.3201   Min.   :-19.7897  
-    ##  1st Qu.: -0.1352   1st Qu.:  0.4548  
-    ##  Median :  2.1769   Median :  1.3631  
-    ##  Mean   :  1.8598   Mean   :  1.4677  
-    ##  3rd Qu.:  4.4395   3rd Qu.:  2.4130  
-    ##  Max.   :128.0563   Max.   : 24.2348  
-    ##  NA's   :257        NA's   :216
+![](proposal_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
 ``` r
-#Summary Stats by Country
-country_summary <- combined_long %>%
-  group_by(name) %>%
-  summarise(
-    mean_gdp = mean(gdpPercap, na.rm = TRUE),
-    mean_lifeExp = mean(lifeExp, na.rm = TRUE),
-    mean_babies_per_woman = mean(babies_per_woman, na.rm = TRUE),
-    mean_homicide = mean(homicide_rate, na.rm = TRUE),
-    mean_gdp_growth = mean(gdp_growth_percent, na.rm = TRUE),
-    mean_pop_growth = mean(pop_growth_percent, na.rm = TRUE)
-  ) %>%
-  arrange(desc(mean_gdp))
-
-view(country_summary)
-
-# Code for a visualization
-combined_long %>%
-ggplot(aes(x = gdpPercap, y = lifeExp)) +
-geom_point(alpha = 0.6) +
-scale_x_log10(labels = scales::dollar_format()) +
-labs(
-title = "Relationship Between GDP per Capita and Life Expectancy (1990–2021)",
-x = "GDP per Capita (log scale, USD)",
-y = "Life Expectancy (years)"
-) 
+ggsave("plot_top_bottom3_gdp_life_expectancy.png", plot = p1, width = 8, height = 5)
 ```
 
-    ## Warning: Removed 64 rows containing missing values or values outside the scale range
-    ## (`geom_point()`).
+### Plot 2: Calculating differences
 
-![](proposal_files/figure-gfm/summary-statistics-and-visualizations-1.png)<!-- -->
+``` r
+# Wealthiest Country
+wealthiest <- combined_long %>%
+  filter(year == 2020) %>%
+  slice_max(gdpPercap, n = 1) %>%
+  select(name, gdpPercap, lifeExp, pop, babies_per_woman, homicide_rate)
+
+#Poorest Country
+poorest <- combined_long %>%
+  filter(year == 2020) %>%
+  slice_min(gdpPercap, n = 1) %>%
+  select(name, gdpPercap, lifeExp, pop, babies_per_woman, homicide_rate)
+
+wealthiest
+```
+
+    ## # A tibble: 1 × 6
+    ##   name   gdpPercap lifeExp   pop babies_per_woman homicide_rate
+    ##   <chr>      <dbl>   <dbl> <dbl>            <dbl>         <dbl>
+    ## 1 Monaco   207845.    80.1 38050             2.38          0.13
+
+``` r
+poorest
+```
+
+    ## # A tibble: 1 × 6
+    ##   name        gdpPercap lifeExp      pop babies_per_woman homicide_rate
+    ##   <chr>           <dbl>   <dbl>    <dbl>            <dbl>         <dbl>
+    ## 1 South Sudan      387.    63.2 10698467             4.16         1718.
+
+``` r
+#GDP Difference Between Wealthiest and Poorest Countries
+gdp_difference <- wealthiest$gdpPercap - poorest$gdpPercap
+gdp_difference
+```
+
+    ## [1] 207458
+
+``` r
+#Life Expectancy Difference
+life_expectancy_difference <- wealthiest$lifeExp - poorest$lifeExp
+life_expectancy_difference
+```
+
+    ## [1] 16.81
+
+``` r
+#Population Difference
+pop_difference <- wealthiest$pop - poorest$pop
+pop_difference
+```
+
+    ## [1] -10660417
+
+``` r
+#Fertility Difference
+fertility_difference <- wealthiest$babies_per_woman - poorest$babies_per_woman
+fertility_difference
+```
+
+    ## [1] -1.78
+
+### Plot 3: \_\_\_\_\_\_\_\_\_\_\_
+
+Add more plot sections as needed. Each project should have at least 3
+plots, but talk to me if you have fewer than 3.
+
+### Plot 4: \_\_\_\_\_\_\_\_\_\_\_
+
+### Plot 2: \_\_\_\_\_\_\_\_\_
+
+### Plot 3: \_\_\_\_\_\_\_\_\_\_\_
+
+Add more plot sections as needed. Each project should have at least 3
+plots, but talk to me if you have fewer than 3.
+
+### Plot 4: \_\_\_\_\_\_\_\_\_\_\_
