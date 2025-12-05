@@ -120,7 +120,7 @@ income_colors <- c(
 ## Plots
 ### Plot 1: Murder Rate x GDP Per Capita
 
-```{r}
+```{r plot-murder-rate, fig.alt = "Scatter plot showing GDP per capita (log scale) on the x-axis and homicide rate per 100,000 people on the y-axis for countries in 2020. Points are colored by income group: Low GDP (coral), Lower-Middle GDP (orange), Upper-Middle GDP (yellow), and High GDP (teal). A dashed gray linear trend line shows a negative relationship, indicating that countries with higher GDP per capita tend to have lower homicide rates."}
 library(dplyr)
 library(ggplot2)
 
@@ -167,7 +167,8 @@ ggsave("murder_rate_X_GDP_per_capita_2020.png")
 ### Plot 2: Life Expectancy x GDP Per Capita
 
 
-```{r}
+```{r plot-life-expectancy, fig.alt = "Scatter plot showing GDP per capita (log scale) on the x-axis and life expectancy in years on the y-axis for countries in 2020. Points are colored by income group: Low GDP (coral), Lower-Middle GDP (orange), Upper-Middle GDP (yellow), and High GDP (teal). A dashed gray linear trend line shows a positive relationship, indicating that countries with higher GDP per capita tend to have higher life expectancy."}
+
 library(dplyr)
 library(ggplot2)
 
@@ -214,7 +215,8 @@ ggsave("life_expectancy_X_GDP_per_capita_2020.png")
 
 ### Plot 3: Fertility Rate x GDP Per Capita 
 
-```{r}
+```{r plot-fertility-rate, fig.alt = "Scatter plot showing GDP per capita (log scale) on the x-axis and fertility rate (babies per woman) on the y-axis for countries in 2020. Points are colored by income group: Low GDP (coral), Lower-Middle GDP (orange), Upper-Middle GDP (yellow), and High GDP (teal). A dashed gray linear trend line shows a negative relationship, indicating that countries with higher GDP per capita tend to have lower fertility rates."}
+
 library(dplyr)
 library(ggplot2)
 
@@ -259,7 +261,7 @@ ggsave("fertility_rate_X_GDP_per_capita_2020.png")
 
 ### Plot 4: Population x GDP Per Capita 
 
-```{r}
+```{r plot-population, fig.alt = "Scatter plot showing GDP per capita (log scale) on the x-axis and population size on the y-axis for countries in 2020. Points are colored by income group: Low GDP (coral), Lower-Middle GDP (orange), Upper-Middle GDP (yellow), and High GDP (teal). A dashed gray linear trend line is included but shows a weak or unclear relationship, indicating that population size does not have a strong linear association with GDP per capita."}
 library(dplyr)
 library(ggplot2)
 
