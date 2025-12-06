@@ -1,6 +1,6 @@
-Project title
+Impact of Countries’ Wealth on Social Outcomes: How GDP per Capita Relates to Murder Rates, Life Expectancy, Population Size, & Fertility (2020)
 ================
-by Team name
+by Team MBK
 
 ## Summary
 
