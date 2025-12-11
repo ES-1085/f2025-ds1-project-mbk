@@ -1,6 +1,6 @@
 Project memo
 ================
-Team name
+Team MBK
 
 This document contains a detailed account of the data cleanup steps and
 design choices for our visualizations exploring the relationship between
