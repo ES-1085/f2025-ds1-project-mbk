@@ -11,6 +11,8 @@ library(tidyverse)
 library(broom)
 library(readr)
 library(scales)
+library(dplyr)
+library(ggplot2)
 ```
 
 ## Data Clean Up Steps for Overall Data
@@ -121,8 +123,6 @@ income_colors <- c(
 ### Plot 1: Murder Rate x GDP Per Capita
 
 ```{r plot-murder-rate, fig.alt = "Scatter plot showing GDP per capita (log scale) on the x-axis and homicide rate per 100,000 people on the y-axis for countries in 2020. Points are colored by income group: Low GDP (coral), Lower-Middle GDP (orange), Upper-Middle GDP (yellow), and High GDP (teal). A dashed gray linear trend line shows a negative relationship, indicating that countries with higher GDP per capita tend to have lower homicide rates."}
-library(dplyr)
-library(ggplot2)
 
 plot_data <- combined_long %>%
   filter(year == 2020,
@@ -169,9 +169,6 @@ ggsave("murder_rate_X_GDP_per_capita_2020.png")
 
 ```{r plot-life-expectancy, fig.alt = "Scatter plot showing GDP per capita (log scale) on the x-axis and life expectancy in years on the y-axis for countries in 2020. Points are colored by income group: Low GDP (coral), Lower-Middle GDP (orange), Upper-Middle GDP (yellow), and High GDP (teal). A dashed gray linear trend line shows a positive relationship, indicating that countries with higher GDP per capita tend to have higher life expectancy."}
 
-library(dplyr)
-library(ggplot2)
-
 plot_data <- combined_long %>%   
   filter(year == 2020,
          !is.na(gdpPercap),
@@ -217,9 +214,6 @@ ggsave("life_expectancy_X_GDP_per_capita_2020.png")
 
 ```{r plot-fertility-rate, fig.alt = "Scatter plot showing GDP per capita (log scale) on the x-axis and fertility rate (babies per woman) on the y-axis for countries in 2020. Points are colored by income group: Low GDP (coral), Lower-Middle GDP (orange), Upper-Middle GDP (yellow), and High GDP (teal). A dashed gray linear trend line shows a negative relationship, indicating that countries with higher GDP per capita tend to have lower fertility rates."}
 
-library(dplyr)
-library(ggplot2)
-
 plot_data <- combined_long %>%
   filter(year == 2020,
          !is.na(gdpPercap),
@@ -262,9 +256,6 @@ ggsave("fertility_rate_X_GDP_per_capita_2020.png")
 ### Plot 4: Population x GDP Per Capita 
 
 ```{r plot-population, fig.alt = "Scatter plot showing GDP per capita (log scale) on the x-axis and population size on the y-axis for countries in 2020. Points are colored by income group: Low GDP (coral), Lower-Middle GDP (orange), Upper-Middle GDP (yellow), and High GDP (teal). A dashed gray linear trend line is included but shows a weak or unclear relationship, indicating that population size does not have a strong linear association with GDP per capita."}
-library(dplyr)
-library(ggplot2)
-
 plot_data <- combined_long %>%
   filter(year == 2020,
          !is.na(gdpPercap),

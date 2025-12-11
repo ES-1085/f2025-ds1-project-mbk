@@ -12,6 +12,8 @@ library(tidyverse)
 library(broom)
 library(readr)
 library(scales)
+library(dplyr)
+library(ggplot2)
 ```
 
 ## Data Clean Up Steps for Overall Data
@@ -137,9 +139,6 @@ income_colors <- c(
 ### Plot 1: Murder Rate x GDP Per Capita
 
 ``` r
-library(dplyr)
-library(ggplot2)
-
 plot_data <- combined_long %>%
   filter(year == 2020,
          !is.na(gdpPercap),
@@ -191,9 +190,6 @@ ggsave("murder_rate_X_GDP_per_capita_2020.png")
 ### Plot 2: Life Expectancy x GDP Per Capita
 
 ``` r
-library(dplyr)
-library(ggplot2)
-
 plot_data <- combined_long %>%   
   filter(year == 2020,
          !is.na(gdpPercap),
@@ -245,9 +241,6 @@ ggsave("life_expectancy_X_GDP_per_capita_2020.png")
 ### Plot 3: Fertility Rate x GDP Per Capita
 
 ``` r
-library(dplyr)
-library(ggplot2)
-
 plot_data <- combined_long %>%
   filter(year == 2020,
          !is.na(gdpPercap),
@@ -299,9 +292,6 @@ ggsave("fertility_rate_X_GDP_per_capita_2020.png")
 ### Plot 4: Population x GDP Per Capita
 
 ``` r
-library(dplyr)
-library(ggplot2)
-
 plot_data <- combined_long %>%
   filter(year == 2020,
          !is.na(gdpPercap),
