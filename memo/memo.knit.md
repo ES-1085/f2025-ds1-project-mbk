@@ -1,11 +1,11 @@
-Project memo
-================
-Team MBK
+---
+title: "Project memo"
+author: "Team MBK"
+output: github_document
+---
 
-This document contains a detailed account of the data cleanup steps and
-design choices for our visualizations exploring the relationship between
-GDP per capita and social outcomes (homicide rates, life expectancy, and
-fertility) across countries from 1990-2021.
+
+This document contains a detailed account of the data cleanup steps and design choices for our visualizations exploring the relationship between GDP per capita and social outcomes (homicide rates, life expectancy, and fertility) across countries from 1990-2021.
 
 ``` r
 library(tidyverse)
@@ -18,9 +18,7 @@ library(scales)
 
 ### Step 1: Load and Pivot Individual Datasets to Long Format
 
-We load five separate Gapminder datasets and convert each from wide
-format (years as columns) to long format (year as a variable) for easier
-analysis and merging.
+We load five separate Gapminder datasets and convert each from wide format (years as columns) to long format (year as a variable) for easier analysis and merging.
 
 ``` r
 homicide <- read_csv("../data/murder_total_deaths.csv")
@@ -67,9 +65,7 @@ pop_long <- population %>%
 
 ### Step 2: Merge Datasets and Filter Years
 
-We merge all five datasets using full joins to preserve all country-year
-observations, then filter to focus on 1990-2021. We also calculate
-growth rates for GDP and population.
+We merge all five datasets using full joins to preserve all country-year observations, then filter to focus on 1990-2021. We also calculate growth rates for GDP and population.
 
 ``` r
 combined_long <- homicide_long %>%
@@ -93,10 +89,7 @@ combined_long <- combined_long %>%
 
 ### Step 3: Create Income Group Classification
 
-We classify countries into four income groups based on GDP per capita
-thresholds from the World Bank. This classification will help us
-visualize patterns across different economic development levels within
-each of our graphs.
+We classify countries into four income groups based on GDP per capita thresholds from the World Bank. This classification will help us visualize patterns across different economic development levels within each of our graphs.
 
 ``` r
 combined_long <- combined_long %>%
@@ -116,10 +109,7 @@ combined_long <- combined_long %>%
 
 ## Color Palette
 
-We use a colorblind-friendly palette throughout our visualizations. The
-colors are distinguishable for people with various types of color vision
-deficiency and are also labeled in legends for double-coding
-accessibility.
+We use a colorblind-friendly palette throughout our visualizations. The colors are distinguishable for people with various types of color vision deficiency and are also labeled in legends for double-coding accessibility.
 
 ``` r
 income_colors <- c(
@@ -130,11 +120,11 @@ income_colors <- c(
 )
 ```
 
-------------------------------------------------------------------------
+---
 
 ## Plots
-
 ### Plot 1: Murder Rate x GDP Per Capita
+
 
 ``` r
 library(dplyr)
@@ -177,7 +167,9 @@ murder_rate_plot <- ggplot(plot_data, aes(x = gdpPercap, y = homicide_rate)) +
 murder_rate_plot
 ```
 
-    ## `geom_smooth()` using formula = 'y ~ x'
+```
+## `geom_smooth()` using formula = 'y ~ x'
+```
 
 <img src="memo_files/figure-gfm/plot-murder-rate-1.png" alt="Scatter plot showing GDP per capita (log scale) on the x-axis and homicide rate per 100,000 people on the y-axis for countries in 2020. Points are colored by income group: Low GDP (coral), Lower-Middle GDP (orange), Upper-Middle GDP (yellow), and High GDP (teal). A dashed gray linear trend line shows a negative relationship, indicating that countries with higher GDP per capita tend to have lower homicide rates."  />
 
@@ -185,10 +177,15 @@ murder_rate_plot
 ggsave("murder_rate_X_GDP_per_capita_2020.png")
 ```
 
-    ## Saving 7 x 5 in image
-    ## `geom_smooth()` using formula = 'y ~ x'
+```
+## Saving 7 x 5 in image
+## `geom_smooth()` using formula = 'y ~ x'
+```
+
 
 ### Plot 2: Life Expectancy x GDP Per Capita
+
+
 
 ``` r
 library(dplyr)
@@ -231,7 +228,9 @@ gdp_life_plot <- ggplot(plot_data, aes(x = gdpPercap, y = lifeExp)) +
 gdp_life_plot
 ```
 
-    ## `geom_smooth()` using formula = 'y ~ x'
+```
+## `geom_smooth()` using formula = 'y ~ x'
+```
 
 <img src="memo_files/figure-gfm/plot-life-expectancy-1.png" alt="Scatter plot showing GDP per capita (log scale) on the x-axis and life expectancy in years on the y-axis for countries in 2020. Points are colored by income group: Low GDP (coral), Lower-Middle GDP (orange), Upper-Middle GDP (yellow), and High GDP (teal). A dashed gray linear trend line shows a positive relationship, indicating that countries with higher GDP per capita tend to have higher life expectancy."  />
 
@@ -239,10 +238,14 @@ gdp_life_plot
 ggsave("life_expectancy_X_GDP_per_capita_2020.png")
 ```
 
-    ## Saving 7 x 5 in image
-    ## `geom_smooth()` using formula = 'y ~ x'
+```
+## Saving 7 x 5 in image
+## `geom_smooth()` using formula = 'y ~ x'
+```
 
-### Plot 3: Fertility Rate x GDP Per Capita
+
+### Plot 3: Fertility Rate x GDP Per Capita 
+
 
 ``` r
 library(dplyr)
@@ -285,7 +288,9 @@ fertility_rate_plot <- ggplot(plot_data, aes(x = gdpPercap, y = babies_per_woman
 fertility_rate_plot
 ```
 
-    ## `geom_smooth()` using formula = 'y ~ x'
+```
+## `geom_smooth()` using formula = 'y ~ x'
+```
 
 <img src="memo_files/figure-gfm/plot-fertility-rate-1.png" alt="Scatter plot showing GDP per capita (log scale) on the x-axis and fertility rate (babies per woman) on the y-axis for countries in 2020. Points are colored by income group: Low GDP (coral), Lower-Middle GDP (orange), Upper-Middle GDP (yellow), and High GDP (teal). A dashed gray linear trend line shows a negative relationship, indicating that countries with higher GDP per capita tend to have lower fertility rates."  />
 
@@ -293,10 +298,13 @@ fertility_rate_plot
 ggsave("fertility_rate_X_GDP_per_capita_2020.png")
 ```
 
-    ## Saving 7 x 5 in image
-    ## `geom_smooth()` using formula = 'y ~ x'
+```
+## Saving 7 x 5 in image
+## `geom_smooth()` using formula = 'y ~ x'
+```
 
-### Plot 4: Population x GDP Per Capita
+### Plot 4: Population x GDP Per Capita 
+
 
 ``` r
 library(dplyr)
@@ -339,7 +347,9 @@ population_plot <- ggplot(plot_data, aes(x = gdpPercap, y = pop)) +
 population_plot
 ```
 
-    ## `geom_smooth()` using formula = 'y ~ x'
+```
+## `geom_smooth()` using formula = 'y ~ x'
+```
 
 <img src="memo_files/figure-gfm/plot-population-1.png" alt="Scatter plot showing GDP per capita (log scale) on the x-axis and population size on the y-axis for countries in 2020. Points are colored by income group: Low GDP (coral), Lower-Middle GDP (orange), Upper-Middle GDP (yellow), and High GDP (teal). A dashed gray linear trend line is included but shows a weak or unclear relationship, indicating that population size does not have a strong linear association with GDP per capita."  />
 
@@ -347,31 +357,36 @@ population_plot
 ggsave("population_X_GDP_per_capita_2020.png")
 ```
 
-    ## Saving 7 x 5 in image
-    ## `geom_smooth()` using formula = 'y ~ x'
+```
+## Saving 7 x 5 in image
+## `geom_smooth()` using formula = 'y ~ x'
+```
+```
 
 
+### Calculating differences
 
-    ### Calculating differences
+``` r
+# Wealthiest Country
+wealthiest <- combined_long %>%
+  filter(year == 2020) %>%
+  slice_max(gdpPercap, n = 1) %>%
+  select(name, gdpPercap, lifeExp, pop, babies_per_woman, homicide_rate)
 
-    ``` r
-    # Wealthiest Country
-    wealthiest <- combined_long %>%
-      filter(year == 2020) %>%
-      slice_max(gdpPercap, n = 1) %>%
-      select(name, gdpPercap, lifeExp, pop, babies_per_woman, homicide_rate)
+#Poorest Country
+poorest <- combined_long %>%
+  filter(year == 2020) %>%
+  slice_min(gdpPercap, n = 1) %>%
+  select(name, gdpPercap, lifeExp, pop, babies_per_woman, homicide_rate)
 
-    #Poorest Country
-    poorest <- combined_long %>%
-      filter(year == 2020) %>%
-      slice_min(gdpPercap, n = 1) %>%
-      select(name, gdpPercap, lifeExp, pop, babies_per_woman, homicide_rate)
+#GDP Difference Between Wealthiest and Poorest Countries
+gdp_difference <- wealthiest$gdpPercap - poorest$gdpPercap
+gdp_difference
+```
 
-    #GDP Difference Between Wealthiest and Poorest Countries
-    gdp_difference <- wealthiest$gdpPercap - poorest$gdpPercap
-    gdp_difference
-
-    ## [1] 207458
+```
+## [1] 207458
+```
 
 ``` r
 #Life Expectancy Difference
@@ -379,7 +394,9 @@ life_expectancy_difference <- wealthiest$lifeExp - poorest$lifeExp
 life_expectancy_difference
 ```
 
-    ## [1] 16.81
+```
+## [1] 16.81
+```
 
 ``` r
 #Population Difference
@@ -387,7 +404,9 @@ pop_difference <- wealthiest$pop - poorest$pop
 pop_difference
 ```
 
-    ## [1] -10660417
+```
+## [1] -10660417
+```
 
 ``` r
 #Fertility Difference
@@ -395,6 +414,7 @@ fertility_difference <- wealthiest$babies_per_woman - poorest$babies_per_woman
 fertility_difference
 ```
 
-    ## [1] -1.78
-
-\`\`\`
+```
+## [1] -1.78
+```
+```
