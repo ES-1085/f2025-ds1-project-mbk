@@ -7,8 +7,11 @@ Our dataset combines five Gapminder datasets from the years 1990–2021.
   - There are 6240 total rows
 - There are 10 columns, representing the different variables.
 
-## name of data file
 
+
+## codebook
+
+Data comes from 5 gapminder datasets which were combined and the following variables were explored:
 - `geo`: Three-letter country code used as a unique identifier  
 - `name`: Country name  
 - `year`: Year of observation (1990–2021)  
