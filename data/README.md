@@ -1,7 +1,5 @@
 # data
 
-Place data file(s) in this folder. Add the dimensions (rows and columns).
-
 Our dataset combines five Gapminder datasets from the years 1990–2021. 
 - Each row represents a single country in a given year (there are 31 rows per country in total).
   - There are 6240 total rows
