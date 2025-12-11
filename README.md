@@ -8,7 +8,7 @@ While economic disparities between nations are oftentimes noticeable, the specif
 
 ## Handout
 
-Our handout can be found [here](handout/handout.pdf). You can update the filename and extension of your handout, currently it is called handout.pdf
+Our handout can be found [here](handout/final_handout.pdf). 
 
 ## Memo
 
